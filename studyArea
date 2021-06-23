@@ -1,0 +1,3 @@
+var test = ee.FeatureCollection('projects/sig-ee/TerraBio_mu_sfx_box_kilobuff').first().geometry()
+Map.addLayer(test)
+print(ee.Number(test.area()).divide(1e6).round())
