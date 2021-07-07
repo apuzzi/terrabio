@@ -109,4 +109,11 @@ var para_esri = esri_lulc10.mosaic().clip(para)
 print(para_esri)
 Map.addLayer(para_esri,{min:1, max:10, palette:dict['colors']}, 'ESRI LULC 10m Pará')
 
-Export.image.toDrive(para_esri)
+Export.image.toDrive({
+  image: para_esri,
+  scale:10,
+  region:para,
+  maxPixels:1e13,
+  description: 'LULC_ESRI_para',
+  fileNamePrefix: 'LULC_ESRI_para'
+})
