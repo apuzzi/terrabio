@@ -118,4 +118,4 @@ Map.addLayer(para_esri,{min:1, max:10, palette:dict['colors']}, 'ESRI LULC 10m P
 //   fileNamePrefix: 'LULC_ESRI_para'
 // })
 
-Map.centerObject(para,10);
+Map.centerObject(para,6);
