@@ -100,7 +100,7 @@ function addCategoricalLegend(panel, dict, title) {
 addCategoricalLegend(legend, dict, 'ESRI 2020 Land Cover');
 
 // Add image to the map
-Map.addLayer(esri_lulc10.mosaic(), {min:1, max:10, palette:dict['colors']}, 'ESRI LULC 10m')
+//Map.addLayer(esri_lulc10.mosaic(), {min:1, max:10, palette:dict['colors']}, 'ESRI LULC 10m')
 
 var para = ee.FeatureCollection('users/an-sig/brazil_boundaries')
               .filterMetadata('SIGLA_UF','equals','PA').first().geometry()
@@ -109,11 +109,13 @@ var para_esri = esri_lulc10.mosaic().clip(para)
 print(para_esri)
 Map.addLayer(para_esri,{min:1, max:10, palette:dict['colors']}, 'ESRI LULC 10m Pará')
 
-Export.image.toDrive({
-  image: para_esri,
-  scale:10,
-  region:para,
-  maxPixels:1e13,
-  description: 'LULC_ESRI_para',
-  fileNamePrefix: 'LULC_ESRI_para'
-})
+// Export.image.toDrive({
+//   image: para_esri,
+//   scale:10,
+//   region:para,
+//   maxPixels:1e13,
+//   description: 'LULC_ESRI_para',
+//   fileNamePrefix: 'LULC_ESRI_para'
+// })
+
+Map.centerObject(para,10)ç
