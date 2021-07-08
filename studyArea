@@ -1,3 +1,9 @@
-var test = ee.FeatureCollection('projects/sig-ee/TerraBio_mu_sfx_box_kilobuff').first().geometry()
-Map.addLayer(test)
-print(ee.Number(test.area()).divide(1e6).round())
+var test = ee.FeatureCollection('projects/sig-ee/TerraBio_mu_sfx_box_kilobuff').first().geometry();
+Map.addLayer(test);
+print(ee.Number(test.area()).divide(1e6).round());
+
+var test2 = ee.FeatureCollection('users/an-sig/TerraBio/aoi').first().geometry();
+Map.addLayer(test2);
+print(ee.Number(test2.area()).divide(1e6).round());
+
+Map.centerObject(test2,8);
