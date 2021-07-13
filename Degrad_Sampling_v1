@@ -33,179 +33,182 @@ var identifier = "v1";
 // Define the datasets to distinguish between Intanct, Degraded, and Deforested 
 var gfw = ee.Image('UMD/hansen/global_forest_change_2020_v1_8'); // Global Forest Watch
 var usgs = ee.ImageCollection('NASA/MEASURES/GFCC/TC/v3'); // Global Forest Cover Change (GFCC) Tree Cover Multi-Year Global 30m
-var mapBiomas = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1'); // Annual Land Cover 
+var mapBiomasImg = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1'); // Annual Land Cover 
 var raisg = ee.Image('users/an-sig/TerraBio/RAISG_deforestation'); // Deforestation
 
+var mapBiomas = ee.ImageCollection.fromImages(mapBiomasImg.bandNames().map(function(band){
+  var img = ee.Image(mapBiomasImg.select(ee.String(band)));
+  return img.set('year',ee.Number.parse(ee.String(band).slice(15)));
+}));
 
+///////////////////////////////////// All criteria  //////////////////////////////////////////
 
-// ///////////////////////////////////// All criteria  //////////////////////////////////////////
+/// Deforested at any time / not deforested  (RAISG)
+var rStartYear;// RAISG starts in 2001, this conditional selects 2001 as startYear if the actual startYear is lower (2000)
+if (startYear < 2001) {rStartYear = 2001;} else { rStartYear = startYear} 
+var def = raisg.lte(endYear).and(raisg.gte(rStartYear));//Deforestation appears as 1
+var noDef = def.not();// No deforestation appears as 1
 
-// /// Deforested at any time / not deforested  (RAISG)
-// var rStartYear;// RAISG starts in 2001, this conditional selects 2001 as startYear if the actual startYear is lower (2000)
-// if (startYear < 2001) {rStartYear = 2001;} else { rStartYear = startYear} 
-// var def = raisg.lte(endYear).and(raisg.gte(rStartYear));//Deforestation appears as 1
-// var noDef = def.not();// No deforestation appears as 1
+/// Forest loss at any time / no loss (GFW)
+var endYearN = endYear-2000;// converts the end year to a number of two digits
+var startYearN = startYear-2000; // converts the end start to a number of two digits
+var loss = gfw.select("lossyear").lte(endYearN).and(gfw.select("lossyear").gte(startYearN)).unmask();
+var noLoss = loss.not();
 
-// /// Forest loss at any time / no loss (GFW)
-// var endYearN = endYear-2000;// converts the end year to a number of two digits
-// var startYearN = startYear-2000; // converts the end start to a number of two digits
-// var loss = gfw.select("lossyear").lte(endYearN).and(gfw.select("lossyear").gte(startYearN)).unmask();
-// var noLoss = loss.not();
+/// Tree cover greater than 75% in 2000 (GFW)
+var tc75_2000 = gfw.select("treecover2000").gt(75);
 
-// /// Tree cover greater than 75% in 2000 (GFW)
-// var tc75_2000 = gfw.select("treecover2000").gt(75);
+/// Tree Cover  criteria (USGS):
+// The USGS dataset has TC data for 2005, 2010, and 2015, so it sets a conditional
+// to select the TC dataset closest to the endYear 
+var tcYear;  
+if (endYear < 2007) {tcYear = 2005;} // this conditional helps to select the TC dataset closest to the endYear 
+else if (endYear >= 2008 && endYear <= 2012) {tcYear = 2010;} 
+else if (endYear > 2013) {tcYear = 2015;}
+// Function for appling a filter to reduce noise in the TC USGS outputs (years 2005 and 2010 are specially noisy)
+var filter = function (image) {
+  // Applies a 90m X 90m filter (default options) 
+  var imageFiltered = image.focal_mode();
+  // This is only for visualization purposes. The reproject is sufficient to force the computation to occur at native scale.
+  return imageFiltered.reproject('EPSG:4326', null, 30);
+};
 
-// /// Tree Cover  criteria (USGS):
-// // The USGS dataset has TC data for 2005, 2010, and 2015, so it sets a conditional
-// // to select the TC dataset closest to the endYear 
-// var tcYear;  
-// if (endYear < 2007) {tcYear = 2005;} // this conditional helps to select the TC dataset closest to the endYear 
-// else if (endYear >= 2008 && endYear <= 2012) {tcYear = 2010;} 
-// else if (endYear > 2013) {tcYear = 2015;}
-// // Function for appling a filter to reduce noise in the TC USGS outputs (years 2005 and 2010 are specially noisy)
-// var filter = function (image) {
-//   // Applies a 90m X 90m filter (default options) 
-//   var imageFiltered = image.focal_mode();
-//   // This is only for visualization purposes. The reproject is sufficient to force the computation to occur at native scale.
-//   return imageFiltered.reproject('EPSG:4326', null, 30);
-// };
+// Tree cover greater than 75% at (or around) the end of the study period (USGS)
+var tc75_endYear = usgs.filterBounds(aoi).select("tree_canopy_cover")
+                      .filterMetadata("year","equals",tcYear).mean().gt(70);// mean is only to convert it into a single image rather than image collection with only one image
+var tc75_endYear_fil = filter (tc75_endYear);
 
-// // Tree cover greater than 75% at (or around) the end of the study period (USGS)
-// var tc75_endYear = usgs.filterBounds(aoi).select("tree_canopy_cover")
-//                       .filterMetadata("year","equals",tcYear).mean().gt(70);// mean is only to convert it into a single image rather than image collection with only one image
-// var tc75_endYear_fil = filter (tc75_endYear);
+// Tree cover greater or equal than 30% and lower or equal than 75% at (or around) the end of the study period (USGS)
+var tc30_endYear = usgs.filterBounds(aoi).select("tree_canopy_cover")
+                      .filterMetadata("year","equals",tcYear).mean().gte(30);// mean is only to convert it into a single image rather than image collection with only one image
+var tcLess75_endYear = usgs.filterBounds(aoi).select("tree_canopy_cover")
+                          .filterMetadata("year","equals",tcYear).mean().lte(70);
+var tc30_75_endYear = tc30_endYear.and(tcLess75_endYear);
+var tc30_75_endYear_fil = filter (tc30_75_endYear);
 
-// // Tree cover greater or equal than 30% and lower or equal than 75% at (or around) the end of the study period (USGS)
-// var tc30_endYear = usgs.filterBounds(aoi).select("tree_canopy_cover")
-//                       .filterMetadata("year","equals",tcYear).mean().gte(30);// mean is only to convert it into a single image rather than image collection with only one image
-// var tcLess75_endYear = usgs.filterBounds(aoi).select("tree_canopy_cover")
-//                           .filterMetadata("year","equals",tcYear).mean().lte(70);
-// var tc30_75_endYear = tc30_endYear.and(tcLess75_endYear);
-// var tc30_75_endYear_fil = filter (tc30_75_endYear);
+var tc_endYear = usgs.filterBounds(aoi).select("tree_canopy_cover")
+                      .filterMetadata("year","equals",tcYear).mean();
 
-// var tc_endYear = usgs.filterBounds(aoi).select("tree_canopy_cover")
-//                       .filterMetadata("year","equals",tcYear).mean();
+// Tree cover lower than 30%
+var tc30_endYear = usgs.filterBounds(aoi).select("tree_canopy_cover")
+                      .filterMetadata("year","equals",tcYear).mean().lt(30);// mean is only to convert it into a single image rather than image collection with only one image
+var tc30_endYear_fil = filter (tc30_endYear);
 
-// // Tree cover lower than 30%
-// var tc30_endYear = usgs.filterBounds(aoi).select("tree_canopy_cover")
-//                       .filterMetadata("year","equals",tcYear).mean().lt(30);// mean is only to convert it into a single image rather than image collection with only one image
-// var tc30_endYear_fil = filter (tc30_endYear);
-
-// /// Forest cover during all the study period (MapBiomas)
-// var rename = function (image){// Funcion for assigning the same name to all bands 
-//   return image.select(0).rename("b1");};
-// var mapBiomas_r= mapBiomas.map(rename);
-// var mapBiomas_fil = mapBiomas_r.filter(ee.Filter.and(//Creates an collection containing the years within the study period (untill 2018)
-//   ee.Filter.gte('year', startYear),
-//   ee.Filter.lte('year', endYear)));
-// var mapBiomas_minMax = mapBiomas_fil.reduce(ee.Reducer.minMax()).rename("min","max");
-// var mapBiomas_range = mapBiomas_minMax.expression('b(\'min\')-b(\'max\')').rename('range');
-// var forestAll = mapBiomas_minMax.select("max").lte(6)//https://storage.googleapis.com/mapbiomas-public/RAISG/COLECAO2/LEGENDA/codigo_de_la_leyenda_coleccion-2.pdf
-//   .and(mapBiomas_range.eq(0)).rename("allForest");//forest is 3 or 6 in the entire Acre-Ucayaly region during all years
+/// Forest cover during all the study period (MapBiomas)
+var rename = function (image){// Funcion for assigning the same name to all bands 
+  return image.select(0).rename("b1");};
+var mapBiomas_r= mapBiomas.map(rename);
+var mapBiomas_fil = mapBiomas_r.filter(ee.Filter.and(//Creates an collection containing the years within the study period (untill 2018)
+  ee.Filter.gte('year', startYear),
+  ee.Filter.lte('year', endYear)));
+var mapBiomas_minMax = mapBiomas_fil.reduce(ee.Reducer.minMax()).rename("min","max");
+var mapBiomas_range = mapBiomas_minMax.expression('b(\'min\')-b(\'max\')').rename('range');
+var forestAll = mapBiomas_minMax.select("max").lte(6)//https://storage.googleapis.com/mapbiomas-public/RAISG/COLECAO2/LEGENDA/codigo_de_la_leyenda_coleccion-2.pdf
+  .and(mapBiomas_range.eq(0)).rename("allForest");//forest is 3 or 6 in the entire Acre-Ucayaly region during all years
   
-// /// Forest / non-forest at the end of the study period (MapBiomas)
-// var forestEndYear = mapBiomas_r.filter(ee.Filter.eq("year",endYear)).mean().lte(6);//mean is only to convert it into a single image rather than image collection with only one image
-// var noForestEndYear = forestEndYear.not();
+/// Forest / non-forest at the end of the study period (MapBiomas)
+var forestEndYear = mapBiomas_r.filter(ee.Filter.eq("year",endYear)).mean().lte(6);//mean is only to convert it into a single image rather than image collection with only one image
+var noForestEndYear = forestEndYear.not();
 
-// ///////// Selection of intact, disturbed, and deforested based on the above criteria //////////////
+///////// Selection of intact, disturbed, and deforested based on the above criteria //////////////
 
-// ///// Intact forest (1)
-// //(Criteria: never classified as deforested, TC>75% in 2000, 
-// //no forest loss, TC>70% in (or around) the endYear, classified as forest during all the study period)
-// var intactForest = noDef.and(tc75_2000).and(noLoss)
-//                         .and(tc75_endYear).and(forestAll).clip(aoi);
+///// Intact forest (1)
+//(Criteria: never classified as deforested, TC>75% in 2000, 
+//no forest loss, TC>70% in (or around) the endYear, classified as forest during all the study period)
+var intactForest = noDef.and(tc75_2000).and(noLoss)
+                        .and(tc75_endYear).and(forestAll).clip(aoi);
 
-// ///// Degraded forest (2)
-// //(Criteria: Deforested at any time, TC>=30<=70% in (or around) the endYear,
-// //and classified as forest at the end of the study period)
-// var degradedForest = def.and(tc30_75_endYear_fil)
-//                         .and(forestEndYear).remap([0,1],[0,2]).clip(aoi);
+///// Degraded forest (2)
+//(Criteria: Deforested at any time, TC>=30<=70% in (or around) the endYear,
+//and classified as forest at the end of the study period)
+var degradedForest = def.and(tc30_75_endYear_fil)
+                        .and(forestEndYear).remap([0,1],[0,2]).clip(aoi);
 
-// ///// Deforested (3)
-// //(Criteria: classified as deforested at any time, forest loss at any time, 
-// //TC<30% in (or around) the endYerar, and classified as non-forest at the end of the study period)
-// var deforested = def.and(loss)
-//                     .and(noForestEndYear).remap([0,1],[0,3]).clip(aoi);
+///// Deforested (3)
+//(Criteria: classified as deforested at any time, forest loss at any time, 
+//TC<30% in (or around) the endYerar, and classified as non-forest at the end of the study period)
+var deforested = def.and(loss)
+                    .and(noForestEndYear).remap([0,1],[0,3]).clip(aoi);
 
-// ///// Merges classes and adds the result to the map (Using Image.cat to combine provoques an error in the sampling)
-// var IntactDegDef = intactForest.add(degradedForest).add(deforested).remap([1,2,3],[1,2,3]).rename("class");
+///// Merges classes and adds the result to the map (Using Image.cat to combine provoques an error in the sampling)
+var IntactDegDef = intactForest.add(degradedForest).add(deforested).remap([1,2,3],[1,2,3]).rename("class");
 
-// Map.addLayer(IntactDegDef, {"opacity":1,"bands":["class"],"palette":["a0ff95","ff6131","b05aff"]},"Intact, Disturbed, and Deforested");
-// Map.centerObject(aoi,10);
+Map.addLayer(IntactDegDef, {"opacity":1,"bands":["class"],"palette":["a0ff95","ff6131","b05aff"]},"Intact, Disturbed, and Deforested");
+Map.centerObject(aoi,10);
 
 
-// ///////////////////////////// Random Sampling ////////////////////////////////////////////
+///////////////////////////// Random Sampling ////////////////////////////////////////////
 
-// // Creates a random sample based on the user-defined number of samplig points per class
-// var samplingPts = IntactDegDef.stratifiedSample({
-//   numPoints: 0, // points for pixel values different than 1 and 2
-//   seed:0,
-//   classValues: [1,2,3], // pixel values to be sampled
-//   classPoints: [samPoints,samPoints,samPoints], // number of sample points for each of the above classes
-//   scale: 30, // Landsat spatial resolution
-//   geometries: true, // retains the spatial information of the sample points needed for a spatial join
-// });
+// Creates a random sample based on the user-defined number of samplig points per class
+var samplingPts = IntactDegDef.stratifiedSample({
+  numPoints: 0, // points for pixel values different than 1 and 2
+  seed:0,
+  classValues: [1,2,3], // pixel values to be sampled
+  classPoints: [samPoints,samPoints,samPoints], // number of sample points for each of the above classes
+  scale: 30, // Landsat spatial resolution
+  geometries: true, // retains the spatial information of the sample points needed for a spatial join
+});
 
-// // Partitions the sample into training and validation points
-// samplingPts = samplingPts.randomColumn(); // adds column of uniform random numbers in a column named 'random' 
-// var split = 0.9;  // roughly 90% training, 10% validation
-// var training = samplingPts.filter(ee.Filter.lt('random', split));
-// var validation = samplingPts.filter(ee.Filter.gte('random', split));
+// Partitions the sample into training and validation points
+samplingPts = samplingPts.randomColumn(); // adds column of uniform random numbers in a column named 'random' 
+var split = 0.9;  // roughly 90% training, 10% validation
+var training = samplingPts.filter(ee.Filter.lt('random', split));
+var validation = samplingPts.filter(ee.Filter.gte('random', split));
 
-// // Ensures that the training samples are uncorrelated with the validation samples 
-// // by removing samples that are within some distance to any other sample(s)
-// var distFilter = ee.Filter.withinDistance({//spatial join
-//   distance: 500,
-//   leftField: '.geo',
-//   rightField: '.geo',
-//   maxError: 10
-// });
-// var join = ee.Join.inverted();
-// training = join.apply(training, validation, distFilter); // applies the join
+// Ensures that the training samples are uncorrelated with the validation samples 
+// by removing samples that are within some distance to any other sample(s)
+var distFilter = ee.Filter.withinDistance({//spatial join
+  distance: 500,
+  leftField: '.geo',
+  rightField: '.geo',
+  maxError: 10
+});
+var join = ee.Join.inverted();
+training = join.apply(training, validation, distFilter); // applies the join
 
-// //Prints the results and adds them to the map
-// print("Training points", training.size());
-// print(training.filterMetadata('class','equals',3));
-// Map.addLayer(training, {},"Training Points");
+//Prints the results and adds them to the map
+print("Training points", training.size());
+print(training.filterMetadata('class','equals',3));
+Map.addLayer(training, {},"Training Points");
 
-// print("Validation points", validation.size());
-// //print(validation);
-// Map.addLayer(validation, {},"Validation Points");
+print("Validation points", validation.size());
+//print(validation);
+Map.addLayer(validation, {},"Validation Points");
 
-// //////////////////////// Exports the training and validation points ////////////////////////
+//////////////////////// Exports the training and validation points ////////////////////////
 
-// Export.table.toAsset({collection:training, 
-//   description:"TrainingPoints_" + identifier, 
-//   assetId: "trainingPts_" + identifier
-//   });
+Export.table.toAsset({collection:training, 
+  description:"TrainingPoints_" + identifier, 
+  assetId: "trainingPts_" + identifier
+  });
 
-// Export.table.toAsset({collection: validation, 
-//   description:"ValidationPoints_" + identifier, 
-//   assetId: "validationPts_"+ identifier
-//   });
+Export.table.toAsset({collection: validation, 
+  description:"ValidationPoints_" + identifier, 
+  assetId: "validationPts_"+ identifier
+  });
 
-// ////////////////////////////////Visualization of criteria/////////////////////////////////////
+////////////////////////////////Visualization of criteria/////////////////////////////////////
 
-// /*
-// // Maps criteria for intact forest
-// Map.addLayer(forestAll.clip(aoi), {},"Forest cover all the study period", false);
-// Map.addLayer(tc75_endYear.clip(aoi), {},"More than 75% TC in (or around) last year", false);
-// Map.addLayer(noLoss.clip(aoi), {},"Not Forest Loss", false);
-// Map.addLayer(tc75_2000.clip(aoi), {},"More than 75% TC in 2000", false);
-// Map.addLayer(noDef.clip(aoi), {},"Never Deforested", false);
-// Map.addLayer(intactForest, {},"Intact Forest", false);
+/*
+// Maps criteria for intact forest
+Map.addLayer(forestAll.clip(aoi), {},"Forest cover all the study period", false);
+Map.addLayer(tc75_endYear.clip(aoi), {},"More than 75% TC in (or around) last year", false);
+Map.addLayer(noLoss.clip(aoi), {},"Not Forest Loss", false);
+Map.addLayer(tc75_2000.clip(aoi), {},"More than 75% TC in 2000", false);
+Map.addLayer(noDef.clip(aoi), {},"Never Deforested", false);
+Map.addLayer(intactForest, {},"Intact Forest", false);
 
-// // Maps criteria for degraded forest
-// Map.addLayer(forestEndYear.clip(aoi), {},"Forest at the end of the study period", false);
-// Map.addLayer(tc30_75_endYear_fil.clip(aoi), {},"TC>=30<=75% in (or around) last year", false);
-// Map.addLayer(def.clip(aoi), {},"Deforested  at any time", false); /// quitar
-// Map.addLayer(loss.clip(aoi), {},"Loss at any time", false); /// quitar
-// Map.addLayer(degradedForest, {},"Degraded Forest", false);
+// Maps criteria for degraded forest
+Map.addLayer(forestEndYear.clip(aoi), {},"Forest at the end of the study period", false);
+Map.addLayer(tc30_75_endYear_fil.clip(aoi), {},"TC>=30<=75% in (or around) last year", false);
+Map.addLayer(def.clip(aoi), {},"Deforested  at any time", false); /// quitar
+Map.addLayer(loss.clip(aoi), {},"Loss at any time", false); /// quitar
+Map.addLayer(degradedForest, {},"Degraded Forest", false);
 
-// //Maps criteria for deforested
-// Map.addLayer(noForestEndYear.clip(aoi), {},"Non-forest at the end of the study period", false);
-// Map.addLayer(tc30_endYear_fil.clip(aoi), {},"TC<25% in (or around) last year", false);
-// Map.addLayer(loss.clip(aoi), {},"Forest loss at any time", false);
-// Map.addLayer(def.clip(aoi), {},"Deforested at any time", false);
-// Map.addLayer(deforested,{}, "Deforested", false);
-// */
+//Maps criteria for deforested
+Map.addLayer(noForestEndYear.clip(aoi), {},"Non-forest at the end of the study period", false);
+Map.addLayer(tc30_endYear_fil.clip(aoi), {},"TC<25% in (or around) last year", false);
+Map.addLayer(loss.clip(aoi), {},"Forest loss at any time", false);
+Map.addLayer(def.clip(aoi), {},"Deforested at any time", false);
+Map.addLayer(deforested,{}, "Deforested", false);
+*/
