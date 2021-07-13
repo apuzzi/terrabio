@@ -34,7 +34,7 @@ var identifier = "v1";
 var gfw = ee.Image('UMD/hansen/global_forest_change_2020_v1_8'); // Global Forest Watch
 var usgs = ee.ImageCollection('NASA/MEASURES/GFCC/TC/v3'); // Global Forest Cover Change (GFCC) Tree Cover Multi-Year Global 30m
 var mapBiomasImg = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1'); // Annual Land Cover 
-var raisg = ee.Image('users/an-sig/TerraBio/RAISG_deforestation'); // Deforestation
+var raisg = ee.Image('users/an-sig/TerraBio/RAISG_deforestation').unmask(); // Deforestation
 
 var mapBiomas = ee.ImageCollection.fromImages(mapBiomasImg.bandNames().map(function(band){
   var img = ee.Image(mapBiomasImg.select(ee.String(band))).rename('b1');
