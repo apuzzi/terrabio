@@ -169,14 +169,14 @@ training = join.apply(training, validation, distFilter); // applies the join
 //Prints the results and adds them to the map
 print("Training points", training.size());
 //print(training);
-Map.addLayer(training, {},"Training Points");
+Map.addLayer(training, {},"Training Points",false);
 print("Training points forest", training.filterMetadata('class','equals',1).size());
 print("Training points degrad", training.filterMetadata('class','equals',2).size());
 print("Training points deforest", training.filterMetadata('class','equals',3).size());
 
 print("Validation points", validation.size());
 //print(validation);
-Map.addLayer(validation, {},"Validation Points");
+Map.addLayer(validation, {},"Validation Points",false);
 print("Validation points forest", validation.filterMetadata('class','equals',1).size());
 print("Validation points degrad", validation.filterMetadata('class','equals',2).size());
 print("Validation points deforest", validation.filterMetadata('class','equals',3).size());
