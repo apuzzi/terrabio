@@ -133,7 +133,7 @@ var deforested = def.and(loss)
 ///// Merges classes and adds the result to the map (Using Image.cat to combine provoques an error in the sampling)
 var IntactDegDef = intactForest.add(degradedForest).add(deforested).remap([1,2,3],[1,2,3]).rename("class");
 
-Map.addLayer(IntactDegDef, {"opacity":1,"bands":["class"],"palette":["a0ff95","ff6131","b05aff"]},"Intact, Disturbed, and Deforested");
+Map.addLayer(IntactDegDef, {"opacity":1,"bands":["class"],"palette":["a0ff95","ff6131","b05aff"]},"Intact, Disturbed, and Deforested",false);
 Map.centerObject(aoi,10);
 
 
@@ -168,12 +168,11 @@ training = join.apply(training, validation, distFilter); // applies the join
 
 //Prints the results and adds them to the map
 print("Training points", training.size());
-print(training.filterMetadata('class','equals',3));
-Map.addLayer(training, {},"Training Points");
+Map.addLayer(training, {},"Training Points",false);
 
 print("Validation points", validation.size());
 //print(validation);
-Map.addLayer(validation, {},"Validation Points");
+Map.addLayer(validation, {},"Validation Points",false);
 
 //////////////////////// Exports the training and validation points ////////////////////////
 
