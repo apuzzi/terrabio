@@ -181,13 +181,13 @@ print("Validation points deforest", validation.filterMetadata('class','equals',3
 //////////////////////// Exports the training and validation points ////////////////////////
 
 Export.table.toAsset({collection:training, 
-  description:"TrainingPoints_" + identifier, 
-  assetId: "trainingPts_" + identifier
+  description:"DegradTrainingPoints_" + identifier, 
+  assetId: "DegradTrainingPts_" + identifier
   });
 
 Export.table.toAsset({collection: validation, 
-  description:"ValidationPoints_" + identifier, 
-  assetId: "validationPts_"+ identifier
+  description:"DegradValidationPoints_" + identifier, 
+  assetId: "DegradValidationPts_"+ identifier
   });
 
 ////////////////////////////////Visualization of criteria/////////////////////////////////////
