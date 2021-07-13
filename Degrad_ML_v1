@@ -176,20 +176,19 @@ var metrics= metricsCollection.toBands();
 
 /// Non-forest areas:
 // Excludes areas that were non-forest during all the study period, includes those that were forest at least once
-var rename = function (image){// Funcion for assigning the same name to all bands 
-  return image.select(0).rename("b1");};
-var nlcms_r= nlcms.map(rename);
-var nlcms_fil = nlcms_r.filter(ee.Filter.and(//Creates an collection containing the years within the study period (untill 2018)
+var mapBiomas_fil = mapBiomas.filter(ee.Filter.and(//Creates an collection containing the years within the study period (untill 2018)
   ee.Filter.gte('year', startYear),
   ee.Filter.lte('year', endYear)));
 // Function for detecting pixels covered by forest 
+//https://storage.googleapis.com/mapbiomas-public/RAISG/COLECAO2/LEGENDA/codigo_de_la_leyenda_coleccion-2.pdf
+//forest is 3 or 6 in the entire Acre-Ucayaly region during all years
 var forest = function (image) {
-  return image.eq(4).or(image.eq(11)).rename("forest")}; // forest and other woodland (IPCC)
-var forestCol = nlcms.map(forest);
+  return image.eq(3).or(image.eq(6)).rename("forest")};
+var forestCol = mapBiomas.map(forest);
 // Selects pixels that were non-forest during all the study period
 var forestSum = forestCol.reduce(ee.Reducer.sum());
-var non_forest = forestSum.eq(0);//Non Forest appears as 0
-var forest = non_forest.not();//Forest appears as 1
+var non_forest = forestSum.eq(0);//Non Forest appears as 1
+var forest = non_forest.not();//Non Forest appears as 0
 
 /////////////////////////////////Random Forest classification/////////////////////////////////////////////
 
