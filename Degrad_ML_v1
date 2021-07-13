@@ -22,20 +22,24 @@ var endYear = 2019;
 var startDay = '01-01';
 var endDay = '12-31';
 var maskThese = ['cloud', 'shadow', 'snow', 'water']; // for LandTrendr composite tool
-var aoi = ee.FeatureCollection('users/rajaramaryal/Western_DR');
+var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
 
 // Sample points
-var trainingPts = ee.FeatureCollection('users/anicolau/Degradation/train_p2v1');
-var validationPts = ee.FeatureCollection('users/anicolau/Degradation/val_p2v1');
+var trainingPts = ee.FeatureCollection('users/an-sig/TerraBio/DegradTrainingPts_v1');
+var validationPts = ee.FeatureCollection('users/an-sig/TerraBio/DegradValidationPts_v1');
 
 // Number of Trees for RF model
 var nTrees = 100;
 
 // Define datasets to define forest and non forest areas
-var nlcms = ee.ImageCollection('users/anicolau/Nepal/np_landcover'); // Annual Land Cover 
+var mapBiomasImg = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1'); // Annual Land Cover 
+var mapBiomas = ee.ImageCollection.fromImages(mapBiomasImg.bandNames().map(function(band){
+  var img = ee.Image(mapBiomasImg.select(ee.String(band))).rename('b1');
+  return img.set('year',ee.Number.parse(ee.String(band).slice(15)));
+}));
 
 // Define an desired identifier that will be added to output names (eg.,ML_Classified_"identifier")
-var identifier = "p2v1";
+var identifier = "v1";
 
 ///////////////////////////// Time Series Trayectories ///////////////////////////////////
 
@@ -255,7 +259,7 @@ var valAccuracy = validated.errorMatrix("class","classification");
 // Exports the image classified into Intanct, Degraded forest, and deforested
 Export.image.toDrive({image:classified_fil, 
   description: "ML_" + identifier , 
-  fileNamePrefix: "users/anicolau/Degradation/ML_" + identifier, 
+  fileNamePrefix: "users/an-sig/TerraBio/DegradML_" + identifier, 
   region:aoi, 
   scale:30,
   maxPixels:600000000 
@@ -263,7 +267,7 @@ Export.image.toDrive({image:classified_fil,
 
 Export.image.toAsset({image:classified_fil, 
   description: "ML_" + identifier , 
-  assetId: "users/anicolau/Degradation/ML_" + identifier, 
+  assetId: "users/an-sig/TerraBio/DegradML_" + identifier, 
   region:aoi, 
   scale:30,
   maxPixels:600000000 
