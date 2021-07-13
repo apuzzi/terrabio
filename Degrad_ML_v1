@@ -28,278 +28,265 @@ var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
 var trainingPts = ee.FeatureCollection('users/an-sig/TerraBio/DegradTrainingPts_v1');
 var validationPts = ee.FeatureCollection('users/an-sig/TerraBio/DegradValidationPts_v1');
 
-Map.addLayer(trainingPts)
-Map.addLayer(trainingPts)
+// Number of Trees for RF model
+var nTrees = 100;
 
-print("Training points", trainingPts.size());
-print("Training points forest", trainingPts.filterMetadata('class','equals',1).size());
-print("Training points degrad", trainingPts.filterMetadata('class','equals',2).size());
-print("Training points deforest", trainingPts.filterMetadata('class','equals',3).size());
+// Define datasets to define forest and non forest areas
+var mapBiomasImg = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1'); // Annual Land Cover 
+var mapBiomas = ee.ImageCollection.fromImages(mapBiomasImg.bandNames().map(function(band){
+  var img = ee.Image(mapBiomasImg.select(ee.String(band))).rename('b1');
+  return img.set('year',ee.Number.parse(ee.String(band).slice(15)));
+}));
 
-print("Validation points", validationPts.size());
-print("Validation points forest", validationPts.filterMetadata('class','equals',1).size());
-print("Validation points degrad", validationPts.filterMetadata('class','equals',2).size());
-print("Validation points deforest", validationPts.filterMetadata('class','equals',3).size());
+// Define an desired identifier that will be added to output names (eg.,ML_Classified_"identifier")
+var identifier = "v1";
 
-// // Number of Trees for RF model
-// var nTrees = 100;
+///////////////////////////// Time Series Trayectories ///////////////////////////////////
 
-// // Define datasets to define forest and non forest areas
-// var mapBiomasImg = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1'); // Annual Land Cover 
-// var mapBiomas = ee.ImageCollection.fromImages(mapBiomasImg.bandNames().map(function(band){
-//   var img = ee.Image(mapBiomasImg.select(ee.String(band))).rename('b1');
-//   return img.set('year',ee.Number.parse(ee.String(band).slice(15)));
-// }));
+// Builds an annual cloud, cloud shadow, snow, and water masked medoid composite of Landsat 
+// Surface Reflectance TM-equivalent bands 1(blue),2(Green),3(Red),4(NIR),5(SWIR1640),7(SWIR2130)
+var ltgee = require('users/emaprlab/public:Modules/LandTrendr.js');// Requires the LandTrendR Library 
+//var ltgee = require('users/retinta/LandTrendR:Utilities_LandTrendR');// Requires the LandTrendR Library 
+var annualSRC = ltgee.buildSRcollection(startYear, endYear, startDay, endDay, aoi, maskThese);
 
-// // Define an desired identifier that will be added to output names (eg.,ML_Classified_"identifier")
-// var identifier = "v1";
+// Function for converting original Surface Reflectance (16-bit signed integer) values to 0-1 range
+//This is not a crucial step but will keep a more homogeneous range of values between indices(NDVI,NDWI,SAVI) and bands(B5 and B7)
+var multiply = function (image) {
+  var multiplication = image.multiply(ee.Image(0.0001));
+  return multiplication.copyProperties(image, ['system:time_start']); 
+};
+var annualSRC_md = annualSRC.map(multiply);
 
-// ///////////////////////////// Time Series Trayectories ///////////////////////////////////
+// Function for adding a time band that will be needed to calculate temporal metrics
+var createTimeBand = function(image) {
+  // Scales milliseconds by a large constant to avoid very small slopes
+  // in the linear regression output (temporal metrics)
+  var time = image.metadata('system:time_start').divide(1e18).rename('time');
+  return image.addBands(time);
+};
+var annualSRC_md_tm = annualSRC_md.map(createTimeBand);
 
-// // Builds an annual cloud, cloud shadow, snow, and water masked medoid composite of Landsat 
-// // Surface Reflectance TM-equivalent bands 1(blue),2(Green),3(Red),4(NIR),5(SWIR1640),7(SWIR2130)
-// var ltgee = require('users/emaprlab/public:Modules/LandTrendr.js');// Requires the LandTrendR Library 
-// //var ltgee = require('users/retinta/LandTrendR:Utilities_LandTrendR');// Requires the LandTrendR Library 
-// var annualSRC = ltgee.buildSRcollection(startYear, endYear, startDay, endDay, aoi, maskThese);
+// Function for adding indices as new bands to each image in the collection
+var addIndices = function(image) {
+  var ndvi = image.expression('(b(\'B4\')-b(\'B3\'))/(b(\'B4\')+b(\'B3\'))').rename('NDVI');
+  var ndwi2130= image.expression('(b(\'B4\')-b(\'B7\'))/(b(\'B4\')+b(\'B7\'))').rename('NDWI2130');
+  var ndwi1640= image.expression('(b(\'B4\')-b(\'B5\'))/(b(\'B4\')+b(\'B5\'))').rename('NDWI1640');
+  var savi= image.expression('1.5*((b(\'B4\')-b(\'B3\'))/(b(\'B4\')+b(\'B3\')+0.5))').rename('SAVI');
+  return image.addBands([ndvi,ndwi2130,ndwi1640,savi]);
+};
+var annualSRC_md_tm_indices = annualSRC_md_tm.map(addIndices);
+// print("Multiplied SR Collection with Time and Indices", annualSRC_md_tm_indices);
 
-// // Function for converting original Surface Reflectance (16-bit signed integer) values to 0-1 range
-// //This is not a crucial step but will keep a more homogeneous range of values between indices(NDVI,NDWI,SAVI) and bands(B5 and B7)
-// var multiply = function (image) {
-//   var multiplication = image.multiply(ee.Image(0.0001));
-//   return multiplication.copyProperties(image, ['system:time_start']); 
-// };
-// var annualSRC_md = annualSRC.map(multiply);
+////////////////////////////// Trajectory metrics /////////////////////////////////////////
 
-// // Function for adding a time band that will be needed to calculate temporal metrics
-// var createTimeBand = function(image) {
-//   // Scales milliseconds by a large constant to avoid very small slopes
-//   // in the linear regression output (temporal metrics)
-//   var time = image.metadata('system:time_start').divide(1e18).rename('time');
-//   return image.addBands(time);
-// };
-// var annualSRC_md_tm = annualSRC_md.map(createTimeBand);
-
-// // Function for adding indices as new bands to each image in the collection
-// var addIndices = function(image) {
-//   var ndvi = image.expression('(b(\'B4\')-b(\'B3\'))/(b(\'B4\')+b(\'B3\'))').rename('NDVI');
-//   var ndwi2130= image.expression('(b(\'B4\')-b(\'B7\'))/(b(\'B4\')+b(\'B7\'))').rename('NDWI2130');
-//   var ndwi1640= image.expression('(b(\'B4\')-b(\'B5\'))/(b(\'B4\')+b(\'B5\'))').rename('NDWI1640');
-//   var savi= image.expression('1.5*((b(\'B4\')-b(\'B3\'))/(b(\'B4\')+b(\'B3\')+0.5))').rename('SAVI');
-//   return image.addBands([ndvi,ndwi2130,ndwi1640,savi]);
-// };
-// var annualSRC_md_tm_indices = annualSRC_md_tm.map(addIndices);
-// // print("Multiplied SR Collection with Time and Indices", annualSRC_md_tm_indices);
-
-// ////////////////////////////// Trajectory metrics /////////////////////////////////////////
-
-// ///// Location metrics: min, max, range, mean /////
-// var min = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
-//     .reduce(ee.Reducer.min());
-// var max = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
-//     .reduce(ee.Reducer.max());
-// var range = max.subtract(min).rename(['B5_range','B7_range','NDVI_range','NDWI2130_range','NDWI1640_range','SAVI_range']);
-// var mean = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
-//     .reduce(ee.Reducer.mean());
+///// Location metrics: min, max, range, mean /////
+var min = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
+    .reduce(ee.Reducer.min());
+var max = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
+    .reduce(ee.Reducer.max());
+var range = max.subtract(min).rename(['B5_range','B7_range','NDVI_range','NDWI2130_range','NDWI1640_range','SAVI_range']);
+var mean = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
+    .reduce(ee.Reducer.mean());
     
-// ///// Scale metrics: stdDev, C.V., kurtosis, skewness /////
-// var stdDev = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
-//     .reduce(ee.Reducer.stdDev());
-// var cv = mean.divide(stdDev).rename(['B5_cv','B7_cv','NDVI_cv','NDWI2130_cv','NDWI1640_cv','SAVI_cv']);
-// var kurt = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
-//     .reduce(ee.Reducer.kurtosis());
-// var skew = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
-//     .reduce(ee.Reducer.skew());
+///// Scale metrics: stdDev, C.V., kurtosis, skewness /////
+var stdDev = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
+    .reduce(ee.Reducer.stdDev());
+var cv = mean.divide(stdDev).rename(['B5_cv','B7_cv','NDVI_cv','NDWI2130_cv','NDWI1640_cv','SAVI_cv']);
+var kurt = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
+    .reduce(ee.Reducer.kurtosis());
+var skew = annualSRC_md_tm_indices.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI'])
+    .reduce(ee.Reducer.skew());
     
-// ///// Temporal metrics /////
-// /// Slope (outpus two bands: 'offset' (y-intercept) and 'scale' (slope))
-// var slopeB5 = annualSRC_md_tm_indices.select(['time','B5'])
-//     .reduce(ee.Reducer.linearFit()).select('scale').rename('B5_slp');
-// var slopeB7 = annualSRC_md_tm_indices.select(['time','B7'])
-//     .reduce(ee.Reducer.linearFit()).select('scale').rename('B7_slp');
-// var slopeNDVI = annualSRC_md_tm_indices.select(['time','NDVI'])
-//     .reduce(ee.Reducer.linearFit()).select('scale').rename('NDVI_slp');
-// var slopeNDWI2130 = annualSRC_md_tm_indices.select(['time','NDWI2130'])
-//     .reduce(ee.Reducer.linearFit()).select('scale').rename('NDWI2130_slp');
-// var slopeNDWI1640 = annualSRC_md_tm_indices.select(['time','NDWI1640'])
-//     .reduce(ee.Reducer.linearFit()).select('scale').rename('NDWI1640_slp');
-// var slopeSAVI = annualSRC_md_tm_indices.select(['time','SAVI'])
-//     .reduce(ee.Reducer.linearFit()).select('scale').rename('SAVI_slp');
+///// Temporal metrics /////
+/// Slope (outpus two bands: 'offset' (y-intercept) and 'scale' (slope))
+var slopeB5 = annualSRC_md_tm_indices.select(['time','B5'])
+    .reduce(ee.Reducer.linearFit()).select('scale').rename('B5_slp');
+var slopeB7 = annualSRC_md_tm_indices.select(['time','B7'])
+    .reduce(ee.Reducer.linearFit()).select('scale').rename('B7_slp');
+var slopeNDVI = annualSRC_md_tm_indices.select(['time','NDVI'])
+    .reduce(ee.Reducer.linearFit()).select('scale').rename('NDVI_slp');
+var slopeNDWI2130 = annualSRC_md_tm_indices.select(['time','NDWI2130'])
+    .reduce(ee.Reducer.linearFit()).select('scale').rename('NDWI2130_slp');
+var slopeNDWI1640 = annualSRC_md_tm_indices.select(['time','NDWI1640'])
+    .reduce(ee.Reducer.linearFit()).select('scale').rename('NDWI1640_slp');
+var slopeSAVI = annualSRC_md_tm_indices.select(['time','SAVI'])
+    .reduce(ee.Reducer.linearFit()).select('scale').rename('SAVI_slp');
 
-// /// Max-slope (maximum absolute linear regression slope of 5-year windows)
-// // Creates a moving 5-year window
-// var join = ee.Join.saveAll({//Returns a join that pairs each element from the annual SR collection 
-//     matchesKey: 'images'    //with a group of matching elements from the 5-year window collection. 
-// });                         //The list of matches is added to each result as an additional property
-// var diffFilter = ee.Filter.maxDifference({ // Establishes the 5-year filter
-//   difference: 78892380000, // 2.5 years in milliseconds, the filter selects 2 years before and after the target year 
-//   leftField: 'system:time_start', // therefore, the extreme windows are made of only 3-4 years   
-//   rightField: 'system:time_start'
-// });
-// var fiveWindowJoin = join.apply({// Collection in which each image is associated with the 5-year window images (see properties:images)
-//   primary: annualSRC_md_tm_indices, 
-//   secondary: annualSRC_md_tm_indices, 
-//   condition: diffFilter
-// });
-// // Function for calculating the absolute maximum slope over 5-year moving windows 
-// var maxAbsMovSlope = function (invar, outvar){
-//   // Calculates slopes over 5-year windows
-//   var mvSlp = ee.ImageCollection(fiveWindowJoin.map(function(image) {
-//     var annualSRC_md_tm_indices = ee.ImageCollection.fromImages(image.get('images'));
-//     return ee.Image(image).addBands(annualSRC_md_tm_indices.select(["time",invar])
-//     .reduce(ee.Reducer.linearFit()));
-//   }));
-//   // Gets rid of the extreme windows, which are made of only 3 or 4 years 
-//   var range1 = mvSlp.reduceColumns(ee.Reducer.minMax(), ["system:time_start"]); //Gets the date range of images in the collection
-//   var filter1 = mvSlp.filter(ee.Filter.date(range1.get('min')).not());
-//   var filter2 = filter1.filter(ee.Filter.date(range1.get('max')).not());
-//   var range2 = filter2.reduceColumns(ee.Reducer.minMax(), ["system:time_start"]);
-//   var filter3 = filter2.filter(ee.Filter.date(range2.get('min')).not());
-//   var filter4 = filter3.filter(ee.Filter.date(range2.get('max')).not());// Print this to see all 5-yer window slopes
-//   // Converts slope values to absolute numbers
-//   var abs = function (image) {return image.select('scale').abs()};
-//   // Extracts the maximum absolute slope
-//   return filter4.map(abs).reduce(ee.Reducer.max()).rename(outvar);
-// };
-// // Applies the absolute moving slope function to all variables
-// var mxSlpB5 = maxAbsMovSlope('B5', 'B5_mxSlp');
-// var mxSlpB7 = maxAbsMovSlope('B7','B7_mxSlp');
-// var mxSlpNDVI = maxAbsMovSlope('NDVI','NDVI_mxSlp');
-// var mxSlpNDWI2130 = maxAbsMovSlope('NDWI2130','NDWI2130_mxSlp');
-// var mxSlpNDWI1640 = maxAbsMovSlope('NDWI1640','NDWI1640_mxSlp');
-// var mxSlpSAVI = maxAbsMovSlope('SAVI','SAVI_mxSlp');
+/// Max-slope (maximum absolute linear regression slope of 5-year windows)
+// Creates a moving 5-year window
+var join = ee.Join.saveAll({//Returns a join that pairs each element from the annual SR collection 
+    matchesKey: 'images'    //with a group of matching elements from the 5-year window collection. 
+});                         //The list of matches is added to each result as an additional property
+var diffFilter = ee.Filter.maxDifference({ // Establishes the 5-year filter
+  difference: 78892380000, // 2.5 years in milliseconds, the filter selects 2 years before and after the target year 
+  leftField: 'system:time_start', // therefore, the extreme windows are made of only 3-4 years   
+  rightField: 'system:time_start'
+});
+var fiveWindowJoin = join.apply({// Collection in which each image is associated with the 5-year window images (see properties:images)
+  primary: annualSRC_md_tm_indices, 
+  secondary: annualSRC_md_tm_indices, 
+  condition: diffFilter
+});
+// Function for calculating the absolute maximum slope over 5-year moving windows 
+var maxAbsMovSlope = function (invar, outvar){
+  // Calculates slopes over 5-year windows
+  var mvSlp = ee.ImageCollection(fiveWindowJoin.map(function(image) {
+    var annualSRC_md_tm_indices = ee.ImageCollection.fromImages(image.get('images'));
+    return ee.Image(image).addBands(annualSRC_md_tm_indices.select(["time",invar])
+    .reduce(ee.Reducer.linearFit()));
+  }));
+  // Gets rid of the extreme windows, which are made of only 3 or 4 years 
+  var range1 = mvSlp.reduceColumns(ee.Reducer.minMax(), ["system:time_start"]); //Gets the date range of images in the collection
+  var filter1 = mvSlp.filter(ee.Filter.date(range1.get('min')).not());
+  var filter2 = filter1.filter(ee.Filter.date(range1.get('max')).not());
+  var range2 = filter2.reduceColumns(ee.Reducer.minMax(), ["system:time_start"]);
+  var filter3 = filter2.filter(ee.Filter.date(range2.get('min')).not());
+  var filter4 = filter3.filter(ee.Filter.date(range2.get('max')).not());// Print this to see all 5-yer window slopes
+  // Converts slope values to absolute numbers
+  var abs = function (image) {return image.select('scale').abs()};
+  // Extracts the maximum absolute slope
+  return filter4.map(abs).reduce(ee.Reducer.max()).rename(outvar);
+};
+// Applies the absolute moving slope function to all variables
+var mxSlpB5 = maxAbsMovSlope('B5', 'B5_mxSlp');
+var mxSlpB7 = maxAbsMovSlope('B7','B7_mxSlp');
+var mxSlpNDVI = maxAbsMovSlope('NDVI','NDVI_mxSlp');
+var mxSlpNDWI2130 = maxAbsMovSlope('NDWI2130','NDWI2130_mxSlp');
+var mxSlpNDWI1640 = maxAbsMovSlope('NDWI1640','NDWI1640_mxSlp');
+var mxSlpSAVI = maxAbsMovSlope('SAVI','SAVI_mxSlp');
 
-// ///// Single year metric /////
-// //Value at last year
-// var rangeDates = annualSRC_md_tm_indices.reduceColumns(ee.Reducer.minMax(), ["system:time_start"]);
-// var lastYearFil = annualSRC_md_tm_indices.filter(ee.Filter.date(rangeDates.get('max')));
-// var lastYear = lastYearFil.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI']).toBands();
-// var lastYearVal= lastYear.rename(['B5_last','B7_last','NDVI_last','NDWI2130_last','NDWI1640_last','SAVI_last']);
+///// Single year metric /////
+//Value at last year
+var rangeDates = annualSRC_md_tm_indices.reduceColumns(ee.Reducer.minMax(), ["system:time_start"]);
+var lastYearFil = annualSRC_md_tm_indices.filter(ee.Filter.date(rangeDates.get('max')));
+var lastYear = lastYearFil.select(['B5','B7','NDVI','NDWI2130','NDWI1640','SAVI']).toBands();
+var lastYearVal= lastYear.rename(['B5_last','B7_last','NDVI_last','NDWI2130_last','NDWI1640_last','SAVI_last']);
 
-// ///// All metrics /////
-// // Creates a collection from all metrics
-// var metricsCollection = ee.ImageCollection([min,max,range,mean,stdDev,cv,kurt,skew,
-//   slopeB5,slopeB7,slopeNDVI,slopeNDWI2130,slopeNDWI1640,slopeSAVI,
-//   mxSlpB5,mxSlpB7,mxSlpNDVI,mxSlpNDWI2130,mxSlpNDWI1640,mxSlpSAVI,lastYearVal]);
+///// All metrics /////
+// Creates a collection from all metrics
+var metricsCollection = ee.ImageCollection([min,max,range,mean,stdDev,cv,kurt,skew,
+  slopeB5,slopeB7,slopeNDVI,slopeNDWI2130,slopeNDWI1640,slopeSAVI,
+  mxSlpB5,mxSlpB7,mxSlpNDVI,mxSlpNDWI2130,mxSlpNDWI1640,mxSlpSAVI,lastYearVal]);
 
-// // Converts the metrics collection to a single multi-band image  
-// var metrics= metricsCollection.toBands();
-// //print("Metrics", metrics);
+// Converts the metrics collection to a single multi-band image  
+var metrics= metricsCollection.toBands();
+//print("Metrics", metrics);
 
-// /////////////////// Masking: delimitation of non-forest areas //////////////////////////////
+/////////////////// Masking: delimitation of non-forest areas //////////////////////////////
 
-// /// Non-forest areas:
-// // Excludes areas that were non-forest during all the study period, includes those that were forest at least once
-// var rename = function (image){// Funcion for assigning the same name to all bands 
-//   return image.select(0).rename("b1");};
-// var nlcms_r= nlcms.map(rename);
-// var nlcms_fil = nlcms_r.filter(ee.Filter.and(//Creates an collection containing the years within the study period (untill 2018)
-//   ee.Filter.gte('year', startYear),
-//   ee.Filter.lte('year', endYear)));
-// // Function for detecting pixels covered by forest 
-// var forest = function (image) {
-//   return image.eq(4).or(image.eq(11)).rename("forest")}; // forest and other woodland (IPCC)
-// var forestCol = nlcms.map(forest);
-// // Selects pixels that were non-forest during all the study period
-// var forestSum = forestCol.reduce(ee.Reducer.sum());
-// var non_forest = forestSum.eq(0);//Non Forest appears as 0
-// var forest = non_forest.not();//Forest appears as 1
+/// Non-forest areas:
+// Excludes areas that were non-forest during all the study period, includes those that were forest at least once
+var rename = function (image){// Funcion for assigning the same name to all bands 
+  return image.select(0).rename("b1");};
+var nlcms_r= nlcms.map(rename);
+var nlcms_fil = nlcms_r.filter(ee.Filter.and(//Creates an collection containing the years within the study period (untill 2018)
+  ee.Filter.gte('year', startYear),
+  ee.Filter.lte('year', endYear)));
+// Function for detecting pixels covered by forest 
+var forest = function (image) {
+  return image.eq(4).or(image.eq(11)).rename("forest")}; // forest and other woodland (IPCC)
+var forestCol = nlcms.map(forest);
+// Selects pixels that were non-forest during all the study period
+var forestSum = forestCol.reduce(ee.Reducer.sum());
+var non_forest = forestSum.eq(0);//Non Forest appears as 0
+var forest = non_forest.not();//Forest appears as 1
 
-// /////////////////////////////////Random Forest classification/////////////////////////////////////////////
+/////////////////////////////////Random Forest classification/////////////////////////////////////////////
 
-// // Overlays the training points over the metrics
-// var collectMetrics = function (feature){//this can be done without a function, but it seems that the functions allows GEE to work with more points before exciding capacity
-//     return metrics.sampleRegions({collection:feature, 
-//     properties: ["class"], 
-//     scale: 30, 
-//     tileScale: 4});
-// };
-// var trainingCol = trainingPts.map(collectMetrics);
-// var trainingPoints = trainingCol.flatten();
-// //print ("Metrics collected in training points",trainingPoints);
+// Overlays the training points over the metrics
+var collectMetrics = function (feature){//this can be done without a function, but it seems that the functions allows GEE to work with more points before exciding capacity
+    return metrics.sampleRegions({collection:feature, 
+    properties: ["class"], 
+    scale: 30, 
+    tileScale: 4});
+};
+var trainingCol = trainingPts.map(collectMetrics);
+var trainingPoints = trainingCol.flatten();
+//print ("Metrics collected in training points",trainingPoints);
 
-// // Creates a random forest classifier with 500 trees and trains it 
-// var classifier = ee.Classifier.smileRandomForest({numberOfTrees: nTrees})
-//   .train({features: trainingPoints, classProperty:"class",
-//   inputProperties:['0_B5_min','0_B7_min','0_NDVI_min','0_NDWI2130_min','0_NDWI1640_min','0_SAVI_min',
-//     '1_B5_max','1_B7_max','1_NDVI_max','1_NDWI2130_max','1_NDWI1640_max','1_SAVI_max',
-//     '2_B5_range','2_B7_range','2_NDVI_range','2_NDWI2130_range','2_NDWI1640_range','2_SAVI_range',
-//     '3_B5_mean','3_B7_mean','3_NDVI_mean','3_NDWI2130_mean','3_NDWI1640_mean','3_SAVI_mean',
-//     '4_B5_stdDev','4_B7_stdDev','4_NDVI_stdDev','4_NDWI2130_stdDev','4_NDWI1640_stdDev','4_SAVI_stdDev',
-//     '5_B5_cv','5_B7_cv','5_NDVI_cv','5_NDWI2130_cv','5_NDWI1640_cv','5_SAVI_cv',
-//     '6_B5_kurtosis','6_B7_kurtosis','6_NDVI_kurtosis','6_NDWI2130_kurtosis','6_NDWI1640_kurtosis','6_SAVI_kurtosis',
-//     '7_B5_skew','7_B7_skew','7_NDVI_skew','7_NDWI2130_skew','7_NDWI1640_skew','7_SAVI_skew',
-//     '8_B5_slp','9_B7_slp','10_NDVI_slp','11_NDWI2130_slp','12_NDWI1640_slp','13_SAVI_slp',
-//     '14_B5_mxSlp','15_B7_mxSlp','16_NDVI_mxSlp','17_NDWI2130_mxSlp','18_NDWI1640_mxSlp','19_SAVI_mxSlp',
-//     '20_B5_last','20_B7_last','20_NDVI_last','20_NDWI2130_last','20_NDWI1640_last','20_SAVI_last']
+// Creates a random forest classifier with 500 trees and trains it 
+var classifier = ee.Classifier.smileRandomForest({numberOfTrees: nTrees})
+  .train({features: trainingPoints, classProperty:"class",
+  inputProperties:['0_B5_min','0_B7_min','0_NDVI_min','0_NDWI2130_min','0_NDWI1640_min','0_SAVI_min',
+    '1_B5_max','1_B7_max','1_NDVI_max','1_NDWI2130_max','1_NDWI1640_max','1_SAVI_max',
+    '2_B5_range','2_B7_range','2_NDVI_range','2_NDWI2130_range','2_NDWI1640_range','2_SAVI_range',
+    '3_B5_mean','3_B7_mean','3_NDVI_mean','3_NDWI2130_mean','3_NDWI1640_mean','3_SAVI_mean',
+    '4_B5_stdDev','4_B7_stdDev','4_NDVI_stdDev','4_NDWI2130_stdDev','4_NDWI1640_stdDev','4_SAVI_stdDev',
+    '5_B5_cv','5_B7_cv','5_NDVI_cv','5_NDWI2130_cv','5_NDWI1640_cv','5_SAVI_cv',
+    '6_B5_kurtosis','6_B7_kurtosis','6_NDVI_kurtosis','6_NDWI2130_kurtosis','6_NDWI1640_kurtosis','6_SAVI_kurtosis',
+    '7_B5_skew','7_B7_skew','7_NDVI_skew','7_NDWI2130_skew','7_NDWI1640_skew','7_SAVI_skew',
+    '8_B5_slp','9_B7_slp','10_NDVI_slp','11_NDWI2130_slp','12_NDWI1640_slp','13_SAVI_slp',
+    '14_B5_mxSlp','15_B7_mxSlp','16_NDVI_mxSlp','17_NDWI2130_mxSlp','18_NDWI1640_mxSlp','19_SAVI_mxSlp',
+    '20_B5_last','20_B7_last','20_NDVI_last','20_NDWI2130_last','20_NDWI1640_last','20_SAVI_last']
     
-//   });
+  });
 
-// // Classifies the input imagery
-// var metricsMask = metrics.mask(forest);// Mask metrics in non-forest areas 
-// var classified = metricsMask.classify(classifier);//Intact forest (1), degraded forest (2), deforested (3)
-// //print("Map Classified");
+// Classifies the input imagery
+var metricsMask = metrics.mask(forest);// Mask metrics in non-forest areas 
+var classified = metricsMask.classify(classifier);//Intact forest (1), degraded forest (2), deforested (3)
+//print("Map Classified");
 
-// ///////////////////////////Post-classification filtering to reduce noise/////////////////////////////////
+///////////////////////////Post-classification filtering to reduce noise/////////////////////////////////
 
-// // Applies a 90m X 90m filter (default options)
-// var classified_fil = classified.focal_mode().mask(forest);
-// // This is only for visualization purposes. The reproject is sufficient
-// // to force the computation to occur at native scale.
-// var classified_fil_vis = classified_fil.reproject('EPSG:4326', null, 30);
-// // Displays the results
-// Map.centerObject(aoi,10);
-// //Map.addLayer(classified_fil_vis.clip(aoi), 
-//               //{"opacity":1,"bands":["classification"],"min":0,"max":3,"palette":["ffffff","7dff5c","0a9b15","ff5514"]},
-//               //"Classification");
+// Applies a 90m X 90m filter (default options)
+var classified_fil = classified.focal_mode().mask(forest);
+// This is only for visualization purposes. The reproject is sufficient
+// to force the computation to occur at native scale.
+var classified_fil_vis = classified_fil.reproject('EPSG:4326', null, 30);
+// Displays the results
+Map.centerObject(aoi,10);
+//Map.addLayer(classified_fil_vis.clip(aoi), 
+              //{"opacity":1,"bands":["classification"],"min":0,"max":3,"palette":["ffffff","7dff5c","0a9b15","ff5514"]},
+              //"Classification");
 
-// ////////////////////////////////////////// Validation /////////////////////////////////////////////////////
+////////////////////////////////////////// Validation /////////////////////////////////////////////////////
 
-// // Overlays the validation points over the metrics
-// var validationCol = validationPts.map(collectMetrics);
-// var validationPoints = validationCol.flatten();
-// //print ("Metrics collected in validation points",validationPoints);
+// Overlays the validation points over the metrics
+var validationCol = validationPts.map(collectMetrics);
+var validationPoints = validationCol.flatten();
+//print ("Metrics collected in validation points",validationPoints);
 
-// // Classify the validation data
-// var validated = validationPoints.classify(classifier);
+// Classify the validation data
+var validated = validationPoints.classify(classifier);
 
-// // Gets a confusion matrix representing expected accuracy
-// var valAccuracy = validated.errorMatrix("class","classification");
-// //print('Validation error matrix: ', valAccuracy);
-// //print('Validation overall accuracy: ', valAccuracy.accuracy());
+// Gets a confusion matrix representing expected accuracy
+var valAccuracy = validated.errorMatrix("class","classification");
+//print('Validation error matrix: ', valAccuracy);
+//print('Validation overall accuracy: ', valAccuracy.accuracy());
 
-// //////////////////////////////////// Results exportation ////////////////////////////////////////////////
+//////////////////////////////////// Results exportation ////////////////////////////////////////////////
 
-// // Exports the image classified into Intanct, Degraded forest, and deforested
-// Export.image.toDrive({image:classified_fil, 
-//   description: "ML_" + identifier , 
-//   fileNamePrefix: "users/an-sig/TerraBio/DegradML_" + identifier, 
-//   region:aoi, 
-//   scale:30,
-//   maxPixels:600000000 
-// });
+// Exports the image classified into Intanct, Degraded forest, and deforested
+Export.image.toDrive({image:classified_fil, 
+  description: "ML_" + identifier , 
+  fileNamePrefix: "users/an-sig/TerraBio/DegradML_" + identifier, 
+  region:aoi, 
+  scale:30,
+  maxPixels:600000000 
+});
 
-// Export.image.toAsset({image:classified_fil, 
-//   description: "ML_" + identifier , 
-//   assetId: "users/an-sig/TerraBio/DegradML_" + identifier, 
-//   region:aoi, 
-//   scale:30,
-//   maxPixels:600000000 
-// });
+Export.image.toAsset({image:classified_fil, 
+  description: "ML_" + identifier , 
+  assetId: "users/an-sig/TerraBio/DegradML_" + identifier, 
+  region:aoi, 
+  scale:30,
+  maxPixels:600000000 
+});
   
-// // Exports the confusion matrix 
-// var toExportMatrix = ee.Feature(null, {matrix: valAccuracy.array()});
-// Export.table.toDrive({
-//   collection: ee.FeatureCollection(toExportMatrix),
-//   description: "ML_Matrix_" + identifier,
-//   fileFormat: 'CSV'
-// });
+// Exports the confusion matrix 
+var toExportMatrix = ee.Feature(null, {matrix: valAccuracy.array()});
+Export.table.toDrive({
+  collection: ee.FeatureCollection(toExportMatrix),
+  description: "ML_Matrix_" + identifier,
+  fileFormat: 'CSV'
+});
 
-// // Exports the validation overall accuracy
-// var toExportAccuracy = ee.Feature(null, {matrix: valAccuracy.accuracy()});
-// Export.table.toDrive({
-//   collection: ee.FeatureCollection(toExportAccuracy),
-//   description: "ML_Accuracy_" + identifier,
-//   fileFormat: 'CSV'
-// });
+// Exports the validation overall accuracy
+var toExportAccuracy = ee.Feature(null, {matrix: valAccuracy.accuracy()});
+Export.table.toDrive({
+  collection: ee.FeatureCollection(toExportAccuracy),
+  description: "ML_Accuracy_" + identifier,
+  fileFormat: 'CSV'
+});
 
-// ////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
