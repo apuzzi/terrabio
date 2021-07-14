@@ -258,7 +258,7 @@ var valAccuracy = validated.errorMatrix("class","classification");
 // Exports the image classified into Intanct, Degraded forest, and deforested
 Export.image.toDrive({image:classified_fil, 
   description: "ML_" + identifier , 
-  fileNamePrefix: "users/an-sig/TerraBio/DegradML_" + identifier, 
+  fileNamePrefix: "DegradML_" + identifier, 
   region:aoi, 
   scale:30,
   maxPixels:600000000 
