@@ -1,0 +1,26 @@
+var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
+Map.centerObject(aoi,8);
+
+var v1 = ee.Image('users/an-sig/TerraBio/DegradML_v1').unmask(4).clip(aoi);
+Map.addLayer(v1,{min: 1, max: 4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'ML v1');
+
+// Forest is green (1), Degradation is red (2), deforestation is purple (3), Non-forest is orange (4)
+
+var options = {
+lineWidth: 1,
+pointSize: 2,
+hAxis: {title: 'Classes'},
+vAxis: {title: 'Num of pixels'},
+title: 'Number of pixels in each class.',
+colors: ['4A7E11', 'C71803','6A137A','E5A512']
+}; 
+
+var pixelChart1 = ui.Chart.image.byClass({
+  image: ee.Image(1).addBands(v1),
+  classBand: 'classification', 
+  region: aoi,
+  scale: 100,
+  reducer: ee.Reducer.count()
+}).setOptions(options);
+
+print(pixelChart1)
