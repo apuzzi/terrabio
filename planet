@@ -1,5 +1,6 @@
-var planet_19_20 = ee.ImageCollection('projects/ee-an-sig/assets/TerraBio/planet').mosaic();
-var planet_21_06 = ee.ImageCollection('projects/ee-an-sig/assets/TerraBio/planet_2021-06').mosaic();
+var planet_19_20 = ee.ImageCollection('projects/ee-an-sig/assets/TerraBio/planet').median();
+var planet_21_06 = ee.ImageCollection('projects/ee-an-sig/assets/TerraBio/planet_2021-06').median();
 
-Map.addLayer(planet_19_20);
-Map.addLayer(planet_21_06);
+Map.addLayer(planet_19_20,{bands:['blue','green','red'],min:420,max:2700});
+Map.addLayer(planet_21_06,{bands:['blue','green','red'],min:420,max:2700});
+
