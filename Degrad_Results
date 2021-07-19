@@ -5,6 +5,9 @@ Map.centerObject(aoi,8);
 var v1 = ee.Image('users/an-sig/TerraBio/DegradML_v1').unmask(4).clip(aoi);
 Map.addLayer(v1,{min: 1, max: 4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'ML v1',false);
 
+var v2 = ee.Image('users/an-sig/TerraBio/DegradML_v2').unmask(4).clip(aoi);
+Map.addLayer(v2,{min: 1, max: 4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'ML v2',false);
+
 // Forest is green (1), Degradation is red (2), deforestation is purple (3), Non-forest is orange (4)
 
 var options = {
