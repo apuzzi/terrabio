@@ -23,4 +23,4 @@ var pixelChart1 = ui.Chart.image.byClass({
   reducer: ee.Reducer.count()
 }).setOptions(options);
 
-print(pixelChart1)
+print(pixelChart1);
