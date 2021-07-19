@@ -32,3 +32,10 @@ print('Restoration dataset',sec);
 Map.addLayer(sec,{bands:['classification_2000'],min:0,max:1},'Sec Forest 2000 (recovery 99-00)',false);
 Map.addLayer(sec,{bands:['classification_2010'],min:0,max:1},'Sec Forest 2010 (recovery 09-10)',false);
 Map.addLayer(sec,{bands:['classification_2019'],min:0,max:1},'Sec Forest 2019 (recovery 18-19)',false);
+
+
+//////////////////////////////// Other datasets //////////////////////////////////////////////
+var cocoa = ee.FeatureCollection('users/an-sig/TerraBio/cocoa_farms');
+Map.addLayer(cocoa,{},'Cocoa farms',false);
+var properties = ee.FeatureCollection('users/an-sig/TerraBio/Imaflora_properties');
+Map.addLayer(properties,{},'Imaflora Properties',false)
