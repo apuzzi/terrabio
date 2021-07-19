@@ -214,7 +214,7 @@ Map.addLayer(tc30_endYear_fil.clip(aoi), {},"TC<25% in (or around) last year", f
 Map.addLayer(loss.clip(aoi), {},"Forest loss at any time", false);
 Map.addLayer(def.clip(aoi), {},"Deforested at any time", false);
 Map.addLayer(deforested,{}, "Deforested", false);
-
+*/
 
 ///////////////////////////// Print sizes after export /////////////////////////////////////////
 var training_export = ee.FeatureCollection('users/an-sig/TerraBio/DegradTrainingPts_v2');
@@ -223,9 +223,8 @@ print("Training points forest", training_export.filterMetadata('class','equals',
 print("Training points degrad", training_export.filterMetadata('class','equals',2).size());
 print("Training points deforest", training_export.filterMetadata('class','equals',3).size());
 
-var validation_export = ee.FeatureCollection('users/an-sig/TerraBio/DegradValidationPts_v2')
-//print("Validation points", validation_export.size());
-// print("Validation points forest", validation_export.filterMetadata('class','equals',1).size());
-// print("Validation points degrad", validation_export.filterMetadata('class','equals',2).size());
-// print("Validation points deforest", validation_export.filterMetadata('class','equals',3).size());
-*/
+var validation_export = ee.FeatureCollection('users/an-sig/TerraBio/DegradValidationPts_v2');
+print("Validation points", validation_export.size());
+print("Validation points forest", validation_export.filterMetadata('class','equals',1).size());
+print("Validation points degrad", validation_export.filterMetadata('class','equals',2).size());
+print("Validation points deforest", validation_export.filterMetadata('class','equals',3).size());
