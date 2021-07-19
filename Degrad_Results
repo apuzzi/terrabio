@@ -1,6 +1,7 @@
 var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
 Map.centerObject(aoi,8);
 
+///////////////////////////////// Degradation results ///////////////////////////////////////
 var v1 = ee.Image('users/an-sig/TerraBio/DegradML_v1').unmask(4).clip(aoi);
 Map.addLayer(v1,{min: 1, max: 4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'ML v1');
 
@@ -24,3 +25,10 @@ var pixelChart1 = ui.Chart.image.byClass({
 }).setOptions(options);
 
 print(pixelChart1);
+
+/////////////////////////////// Restoration dataset ////////////////////////////////////////
+var sec = ee.Image('users/celsohlsj/public/secondary_forest_extent_collection5_v3').clip(aoi);
+print('Restoration dataset',sec);
+Map.addLayer(sec,{bands:['classification_2000'],min:0,max:1},'Sec Forest 2000 (recovery 99-00)',false);
+Map.addLayer(sec,{bands:['classification_2010'],min:0,max:1},'Sec Forest 2010 (recovery 09-10)',false);
+Map.addLayer(sec,{bands:['classification_2019'],min:0,max:1},'Sec Forest 2019 (recovery 18-19)',false);
