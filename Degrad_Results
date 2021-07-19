@@ -35,7 +35,13 @@ Map.addLayer(sec,{bands:['classification_2019'],min:0,max:1},'Sec Forest 2019 (r
 
 
 //////////////////////////////// Other datasets //////////////////////////////////////////////
+// Cocoa farms
 var cocoa = ee.FeatureCollection('users/an-sig/TerraBio/cocoa_farms');
 Map.addLayer(cocoa,{},'Cocoa farms',false);
+
+// Imaflora properties (land use)
 var properties = ee.FeatureCollection('users/an-sig/TerraBio/Imaflora_properties');
-Map.addLayer(properties,{},'Imaflora Properties',false)
+Map.addLayer(properties,{},'Imaflora Properties',false);
+
+// Planet imagery
+
