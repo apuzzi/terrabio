@@ -23,6 +23,8 @@ var forestSum = forestCol.reduce(ee.Reducer.sum());
 var non_forest = forestSum.eq(0);//Non Forest appears as 1
 var forest = non_forest.not();//Non Forest appears as 0
 
+Map.addLayer(forestSum,{min:0,max:1});
+
 Export.image.toAsset({
   image:forestSum,
   scale:30,
