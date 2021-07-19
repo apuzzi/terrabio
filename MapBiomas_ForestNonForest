@@ -1,0 +1,33 @@
+var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
+var startYear = 2000;
+var endYear = 2019;
+
+// Make Image into ImageCollection
+var mapBiomasImg = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1'); // Annual Land Cover 
+var mapBiomas = ee.ImageCollection.fromImages(mapBiomasImg.bandNames().map(function(band){
+  var img = ee.Image(mapBiomasImg.select(ee.String(band))).rename('b1');
+  return img.set('year',ee.Number.parse(ee.String(band).slice(15)));
+}));
+
+// Excludes areas that were non-forest during all the study period, includes those that were forest at least once
+var mapBiomas_fil = mapBiomas.filter(ee.Filter.and(//Creates an collection containing the years within the study period
+  ee.Filter.gte('year', startYear),
+  ee.Filter.lte('year', endYear)));
+// Function for detecting pixels covered by forest 
+//forest is 3 or 6
+var forest = function (image) {
+  return image.eq(3).or(image.eq(6)).rename("forest")};
+var forestCol = mapBiomas.map(forest);
+// Selects pixels that were non-forest during all the study period
+var forestSum = forestCol.reduce(ee.Reducer.sum());
+var non_forest = forestSum.eq(0);//Non Forest appears as 1
+var forest = non_forest.not();//Non Forest appears as 0
+
+Export.image.toAsset({
+  image:forestSum,
+  scale:30,
+  maxPixels:1e13,
+  region: aoi,
+  assetId: 'users/an-sig/TerraBio/MapBiomasFNF',
+  description: 'MapBiomasFNF'
+});
