@@ -1,5 +1,6 @@
 var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
 var sec = ee.Image('users/celsohlsj/public/secondary_forest_extent_collection5_v3').clip(aoi);
+print(sec)
 Map.addLayer(sec,{bands:['classification_2000'],min:0,max:1},'classification 2000');
 Map.addLayer(sec,{bands:['classification_2010'],min:0,max:1},'classification 2010');
 Map.addLayer(sec,{bands:['classification_2019'],min:0,max:1},'classification 2019');
