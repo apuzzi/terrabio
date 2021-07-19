@@ -33,3 +33,6 @@ Export.image.toAsset({
   assetId: 'users/an-sig/TerraBio/MapBiomasFNF',
   description: 'MapBiomasFNF'
 });
+
+var exported = ee.Image('users/an-sig/TerraBio/MapBiomasFNF');
+Map.addLayer(exported,{min:0,max:1});
