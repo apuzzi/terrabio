@@ -47,5 +47,5 @@ Map.addLayer(properties,{},'Imaflora Properties',false);
 var planet_19_20 = ee.ImageCollection('projects/ee-an-sig/assets/TerraBio/planet').median();
 var planet_21_06 = ee.ImageCollection('projects/ee-an-sig/assets/TerraBio/planet_2021-06').median();
 
-Map.addLayer(planet_19_20,{bands:['blue','green','red'],min:250,max:1200});
-Map.addLayer(planet_21_06,{bands:['blue','green','red'],min:280,max:1600});
+Map.addLayer(planet_19_20,{bands:['blue','green','red'],min:250,max:1200},false);
+Map.addLayer(planet_21_06,{bands:['blue','green','red'],min:280,max:1600},false);
