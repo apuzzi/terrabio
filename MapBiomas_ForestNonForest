@@ -17,7 +17,7 @@ var mapBiomas_fil = mapBiomas.filter(ee.Filter.and(//Creates an collection conta
 // Function for detecting pixels covered by forest 
 //forest is 3 or 6
 var forest = function (image) {
-  return image.eq(3).or(image.eq(6)).rename("forest").clip(aoi).set('year',image.get('year'))};
+  return image.eq(3).or(image.eq(6)).rename("landcover").clip(aoi).set('year',image.get('year'))};
 var forestCol = mapBiomas.map(forest);
 // Selects pixels that were non-forest during all the study period
 var forestSum = forestCol.reduce(ee.Reducer.sum());
@@ -62,7 +62,7 @@ var sample2007 = forestCol.filterMetadata('year','equals',2007).first().stratifi
     geometries:true
   }).map(function(feat){
     var feat_ = feat.set('year',2007);
-    return ee.Algorithms.If(ee.Number(feat_.get('forest')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
+    return ee.Algorithms.If(ee.Number(feat_.get('landcover')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
 });
 var sample2012 = forestCol.filterMetadata('year','equals',2012).first().stratifiedSample({
     numPoints:0,
@@ -72,20 +72,20 @@ var sample2012 = forestCol.filterMetadata('year','equals',2012).first().stratifi
     geometries:true
   }).map(function(feat){
     var feat_ = feat.set('year',2012);
-    return ee.Algorithms.If(ee.Number(feat_.get('forest')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
+    return ee.Algorithms.If(ee.Number(feat_.get('landcover')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
 });
 var sampleAll = sample2007.merge(sample2012);
 //print(sampleAll);
 //Map.addLayer(sampleAll);
 
-// Export.table.toAsset({
-//   collection: sampleAll,
-//   description: 'CODED_training',
-//   assetId: 'users/an-sig/TerraBio/CODED_testPts_07_12'
-// });
-Map.addLayer(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_07_12'))
+Export.table.toAsset({
+  collection: sampleAll,
+  description: 'CODED_training',
+  assetId: 'users/an-sig/TerraBio/CODED_testPts_07_12'
+});
+// Map.addLayer(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_07_12'))
 print(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_07_12'))
-
+print(sampleAll)
 
 
 // only 2010
@@ -97,17 +97,17 @@ var sample2010 = forestCol.filterMetadata('year','equals',2010).first().stratifi
     geometries:true
   }).map(function(feat){
     var feat_ = feat.set('year',2010);
-    return ee.Algorithms.If(ee.Number(feat_.get('forest')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
+    return ee.Algorithms.If(ee.Number(feat_.get('landcover')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
 });
 
 //print(sample2010);
 
-// Export.table.toAsset({
-//   collection: sample2010,
-//   description: 'CODED_training',
-//   assetId: 'users/an-sig/TerraBio/CODED_testPts_2010'
-// });
-Map.addLayer(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_2010'))
+Export.table.toAsset({
+  collection: sample2010,
+  description: 'CODED_training',
+  assetId: 'users/an-sig/TerraBio/CODED_testPts_2010'
+});
+// Map.addLayer(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_2010'))
 print(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_2010'))
-
+print(sampleAll.first())
 
