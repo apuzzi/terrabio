@@ -17,7 +17,7 @@ var mapBiomas_fil = mapBiomas.filter(ee.Filter.and(//Creates an collection conta
 // Function for detecting pixels covered by forest 
 //forest is 3 or 6
 var forest = function (image) {
-  return image.eq(3).or(image.eq(6)).rename("forest").set('year',image.get('year'))};
+  return image.eq(3).or(image.eq(6)).rename("forest").clip(aoi).set('year',image.get('year'))};
 var forestCol = mapBiomas.map(forest);
 // Selects pixels that were non-forest during all the study period
 var forestSum = forestCol.reduce(ee.Reducer.sum());
@@ -54,7 +54,7 @@ var FNF2000 = forestCol.filterMetadata('year','equals',2000).first();
 
 ////////////////////////////////// Sampling from different years for CODED ////////////////////////////////////////////////
 // 2007 and 2012
-var sample2007 = forestCol.filterMetadata('year','equals',2007).first().clip(aoi).stratifiedSample({
+var sample2007 = forestCol.filterMetadata('year','equals',2007).first().stratifiedSample({
     numPoints:0,
     classValues:[0,1],
     classPoints:[5,5],
@@ -64,7 +64,7 @@ var sample2007 = forestCol.filterMetadata('year','equals',2007).first().clip(aoi
     var feat_ = feat.set('year',2007);
     return ee.Algorithms.If(ee.Number(feat_.get('forest')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
 });
-var sample2012 = forestCol.filterMetadata('year','equals',2012).first().clip(aoi).stratifiedSample({
+var sample2012 = forestCol.filterMetadata('year','equals',2012).first().stratifiedSample({
     numPoints:0,
     classValues:[0,1],
     classPoints:[5,5],
@@ -78,15 +78,18 @@ var sampleAll = sample2007.merge(sample2012);
 //print(sampleAll);
 //Map.addLayer(sampleAll);
 
-Export.table.toAsset({
-  collection: sampleAll,
-  description: 'CODED_training',
-  assetId: 'users/an-sig/TerraBio/CODED_testPts_07_12'
-});
-//Map.addLayer(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_07_12'))
+// Export.table.toAsset({
+//   collection: sampleAll,
+//   description: 'CODED_training',
+//   assetId: 'users/an-sig/TerraBio/CODED_testPts_07_12'
+// });
+Map.addLayer(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_07_12'))
+print(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_07_12'))
+
+
 
 // only 2010
-var sample2010 = forestCol.filterMetadata('year','equals',2010).first().clip(aoi).stratifiedSample({
+var sample2010 = forestCol.filterMetadata('year','equals',2010).first().stratifiedSample({
     numPoints:0,
     classValues:[0,1],
     classPoints:[10,10],
@@ -99,9 +102,12 @@ var sample2010 = forestCol.filterMetadata('year','equals',2010).first().clip(aoi
 
 //print(sample2010);
 
-Export.table.toAsset({
-  collection: sample2010,
-  description: 'CODED_training',
-  assetId: 'users/an-sig/TerraBio/CODED_testPts_2010'
-});
+// Export.table.toAsset({
+//   collection: sample2010,
+//   description: 'CODED_training',
+//   assetId: 'users/an-sig/TerraBio/CODED_testPts_2010'
+// });
+Map.addLayer(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_2010'))
+print(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_2010'))
+
 
