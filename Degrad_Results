@@ -43,7 +43,8 @@ var pixelChart2 = ui.Chart.image.byClass({
 print(pixelChart2);
 
 /////////////////////////////// Restoration dataset ////////////////////////////////////////
-var sec = ee.Image('users/celsohlsj/public/secondary_forest_extent_collection5_v3').clip(aoi);
+//var sec = ee.Image('users/celsohlsj/public/secondary_forest_extent_collection5_v3').clip(aoi);
+var sec = ee.Image('users/celsohlsj/public/secondary_forest_increment_collection5_v3').clip(aoi);
 print('Restoration dataset',sec);
 Map.addLayer(sec,{bands:['classification_2000'],min:0,max:1},'Sec Forest 2000 (recovery 99-00)',false);
 Map.addLayer(sec,{bands:['classification_2010'],min:0,max:1},'Sec Forest 2010 (recovery 09-10)',false);
