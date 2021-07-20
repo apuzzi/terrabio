@@ -16,7 +16,7 @@ var mapBiomas_fil = mapBiomas.filter(ee.Filter.and(//Creates an collection conta
 // Function for detecting pixels covered by forest 
 //forest is 3 or 6
 var forest = function (image) {
-  return image.eq(3).or(image.eq(6)).rename("forest")};
+  return image.eq(3).or(image.eq(6)).rename("forest").set('year',image.get('year'))};
 var forestCol = mapBiomas.map(forest);
 // Selects pixels that were non-forest during all the study period
 var forestSum = forestCol.reduce(ee.Reducer.sum());
@@ -34,5 +34,18 @@ Export.image.toAsset({
   description: 'MapBiomasFNF'
 });
 
-var exported = ee.Image('users/an-sig/TerraBio/MapBiomasFNF');
+var exported = ee.Image('users/an-sig/TerraBio/MapBiomasFNF').clip(aoi);
 Map.addLayer(exported,{min:0,max:1});
+
+
+var FNF2000 = forestCol.filterMetadata('year','equals',2000).first();
+Export.image.toAsset({
+  image: FNF2000,
+  scale:30,
+  maxPixels:1e13,
+  region:aoi,
+    assetId: 'users/an-sig/TerraBio/MapBiomasFNF2000',
+  description: 'MapBiomasFNF2000'
+});
+
+Map.addLayer(FNF2000,{min:0,max:1});
