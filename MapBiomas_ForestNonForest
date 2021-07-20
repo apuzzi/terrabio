@@ -75,14 +75,14 @@ var sample2012 = forestCol.filterMetadata('year','equals',2012).first().stratifi
     return ee.Algorithms.If(ee.Number(feat_.get('forest')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
 });
 var sampleAll = sample2007.merge(sample2012);
-print(sampleAll);
-Map.addLayer(sampleAll);
+//print(sampleAll);
+//Map.addLayer(sampleAll);
 
-Export.table.toAsset({
-  collection: sampleAll,
-  description: 'CODED_training',
-  assetId: 'users/an-sig/TerraBio/CODED_testPts2'
-});
+// Export.table.toAsset({
+//   collection: sampleAll,
+//   description: 'CODED_training',
+//   assetId: 'users/an-sig/TerraBio/CODED_testPts2'
+// });
 
 
 // only 2010
