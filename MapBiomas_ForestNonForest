@@ -53,19 +53,39 @@ var FNF2000 = forestCol.filterMetadata('year','equals',2000).first();
 
 
 ////////////////////////////////// Sampling from different years for CODED ////////////////////////////////////////////////
-// var sample = forestCol.map(function(img){
-//   return img.stratifiedSample({
-//     numPoints:0,
-//     classValues:[0,1],
-//     classPoints:[10,10],
-//     scale:30,
-//     geometries:true
-//   }).map(function(feat){
-//     return feat.set('year',img.get('year'));
-//   });
-// });
-// print(sample);
+// 2007 and 2012
+var sample2007 = forestCol.filterMetadata('year','equals',2007).first().stratifiedSample({
+    numPoints:0,
+    classValues:[0,1],
+    classPoints:[5,5],
+    scale:30,
+    geometries:true
+  }).map(function(feat){
+    var feat_ = feat.set('year',2007);
+    return ee.Algorithms.If(ee.Number(feat_.get('forest')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
+});
+var sample2012 = forestCol.filterMetadata('year','equals',2012).first().stratifiedSample({
+    numPoints:0,
+    classValues:[0,1],
+    classPoints:[5,5],
+    scale:30,
+    geometries:true
+  }).map(function(feat){
+    var feat_ = feat.set('year',2012);
+    return ee.Algorithms.If(ee.Number(feat_.get('forest')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
+});
+var sampleAll = sample2007.merge(sample2012);
+print(sampleAll);
+Map.addLayer(sampleAll);
 
+Export.table.toAsset({
+  collection: sampleAll,
+  description: 'CODED_training',
+  assetId: 'users/an-sig/TerraBio/CODED_testPts2'
+});
+
+
+// only 2010
 var sample2010 = forestCol.filterMetadata('year','equals',2010).first().stratifiedSample({
     numPoints:0,
     classValues:[0,1],
@@ -73,8 +93,15 @@ var sample2010 = forestCol.filterMetadata('year','equals',2010).first().stratifi
     scale:30,
     geometries:true
   }).map(function(feat){
-    return feat.set('year',2010);
+    var feat_ = feat.set('year',2010);
+    return ee.Algorithms.If(ee.Number(feat_.get('forest')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
 });
 
-print(sample2010.first())
+//print(sample2010);
+
+// Export.table.toAsset({
+//   collection: sample2010,
+//   description: 'CODED_training',
+//   assetId: 'users/an-sig/TerraBio/CODED_testPts'
+// });
 
