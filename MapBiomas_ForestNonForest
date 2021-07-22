@@ -89,16 +89,16 @@ var sampleAll = sample2007.merge(sample2012);
 
 
 // only 2010
-var sample2010 = forestCol.filterMetadata('year','equals',2010).first().stratifiedSample({
-    numPoints:0,
-    classValues:[0,1],
-    classPoints:[10,10],
-    scale:30,
-    geometries:true
-  }).map(function(feat){
-    var feat_ = feat.set('year',2010);
-    return ee.Algorithms.If(ee.Number(feat_.get('landcover')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
-});
+// var sample2010 = forestCol.filterMetadata('year','equals',2010).first().stratifiedSample({
+//     numPoints:0,
+//     classValues:[0,1],
+//     classPoints:[10,10],
+//     scale:30,
+//     geometries:true
+//   }).map(function(feat){
+//     var feat_ = feat.set('year',2010);
+//     return ee.Algorithms.If(ee.Number(feat_.get('landcover')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
+// });
 
 //print(sample2010);
 
@@ -110,4 +110,25 @@ var sample2010 = forestCol.filterMetadata('year','equals',2010).first().stratifi
 // Map.addLayer(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_2010'))
 // print(ee.FeatureCollection('users/an-sig/TerraBio/CODED_testPts_2010'))
 // print(sampleAll.first())
+
+/////////////////////// sampling for real, 2010
+// only 2010
+var sample2010 = forestCol.filterMetadata('year','equals',2010).first().stratifiedSample({
+    numPoints:0,
+    classValues:[0,1],
+    classPoints:[1000,1000],
+    scale:30,
+    geometries:true
+  }).map(function(feat){
+    var feat_ = feat.set('year',2010);
+    return ee.Algorithms.If(ee.Number(feat_.get('landcover')).eq(0),feat_.set('class','non-forest'),feat_.set('class','forest'));
+});
+
+//print(sample2010);
+
+Export.table.toAsset({
+  collection: sample2010,
+  description: 'CODED_training',
+  assetId: 'users/an-sig/TerraBio/CODED_Pts_2010'
+});
 
