@@ -116,7 +116,7 @@ var sampleAll = sample2007.merge(sample2012);
 var sample2010 = forestCol.filterMetadata('year','equals',2010).first().stratifiedSample({
     numPoints:0,
     classValues:[0,1],
-    classPoints:[1000,1000],
+    classPoints:[1500,1500],
     scale:30,
     geometries:true
   }).map(function(feat){
