@@ -1,0 +1,173 @@
+var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
+Map.centerObject(aoi,8);
+
+///////////////////////////////// Degradation results ///////////////////////////////////////
+var v3 = ee.Image('users/an-sig/TerraBio/DegradML_v3').unmask(4).clip(aoi);
+Map.addLayer(v3,{min: 1, max: 4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'ML degradation 2000-2019',false);
+
+// Forest is green (1), Degradation is red (2), deforestation is purple (3), Non-forest is orange (4)
+
+
+///////////////////////////// Land use map //////////////////////////////////////////////////////
+// Thibaud's v1
+
+var agroforestry_v1 = ee.Image('users/an-sig/TerraBio/agroforestry_v1');
+Map.addLayer(agroforestry_v1,{bands:['b1'],min:-1,max:7,palette:['0ee1c0','dc0f0f','e79848','eae23e','07660a','6464ef','e633ab','2323c0','9e45ca']},'Land use map 2020',false);
+
+
+//////////////////////////////// Other datasets //////////////////////////////////////////////
+// Cocoa farms
+var cocoa = ee.FeatureCollection('users/an-sig/TerraBio/cocoa_farms');
+Map.addLayer(cocoa,{},'Cocoa farms',false);
+
+// Imaflora properties (land use)
+var properties = ee.FeatureCollection('users/an-sig/TerraBio/Imaflora_properties');
+Map.addLayer(properties,{},'Imaflora Properties',false);
+
+// Planet imagery
+var planet_19_20 = ee.ImageCollection('projects/ee-an-sig/assets/TerraBio/planet').median();
+var planet_21_06 = ee.ImageCollection('projects/ee-an-sig/assets/TerraBio/planet_2021-06').median();
+
+Map.addLayer(planet_19_20,{bands:['blue','green','red'],min:250,max:1200},'Planet 2019-12_2020-05 mosaic',false);
+Map.addLayer(planet_21_06,{bands:['blue','green','red'],min:280,max:1600},'Planet 2021-06 mosaic',false);
+
+
+/////////////////////////// Overlap between cocoa farms and degradation areas ///////////////////////
+var cocoa_only = agroforestry_v1.updateMask(agroforestry_v1.eq(7)); // cocoa pixels are 7
+var degradation_only = v3.updateMask(v3.eq(2)); // degradation pixels are 3
+
+// Make cocoa-only pixels 1, degradation-only pixels 2, and add them together. overlap pixels will be 3
+var overlap = cocoa_only.remap([7],[1]).add(degradation_only);
+Map.addLayer(overlap,{min:1,max:3,palette:['white','black','red']},'cocoa-only white, degradation-only black, overlap red');
+
+
+// legend
+// Land use
+// set position of panel
+var legend = ui.Panel({
+  style: {
+    position: 'bottom-left',
+    padding: '8px 15px'
+  }
+});
+
+// Create legend title
+var legendTitle = ui.Label({
+  value: 'Land use map',
+  style: {
+    fontWeight: 'bold',
+    fontSize: '18px',
+    margin: '0 0 4px 0',
+    padding: '0'
+    }
+});
+
+// Add the title to the panel
+legend.add(legendTitle);
+    
+// Creates and styles 1 row of the legend.
+var makeRow = function(color, name) {
+      
+      // Create the label that is actually the colored box.
+      var colorBox = ui.Label({
+        style: {
+          backgroundColor: '#' + color,
+          // Use padding to give the box height and width.
+          padding: '8px',
+          margin: '0 0 4px 0'
+        }
+      });
+      
+      // Create the label filled with the description text.
+      var description = ui.Label({
+        value: name,
+        style: {margin: '0 0 4px 6px'}
+      });
+      
+      // return the panel
+      return ui.Panel({
+        widgets: [colorBox, description],
+        layout: ui.Panel.Layout.Flow('horizontal')
+      });
+};
+
+
+//  Palette with the colors
+var palette =['0ee1c0','dc0f0f','e79848','eae23e','07660a','6464ef','e633ab','2323c0','9e45ca'];
+
+// name of the legend
+var names = ['No data','Bushland/Grassland','Pasture','Mining','Forest','Agriculture','Urban areas','Water','Cocoa'];
+
+// Add color and and names
+for (var i = 0; i < 9; i++) {
+  legend.add(makeRow(palette[i], names[i]));
+  }  
+
+// add legend to map (alternatively you can also print the legend to the console)  
+Map.add(legend); 
+
+
+
+// Degradation map
+// set position of panel
+var legend2 = ui.Panel({
+  style: {
+    position: 'bottom-right',
+    padding: '8px 15px'
+  }
+});
+
+// Create legend title
+var legendTitle2 = ui.Label({
+  value: 'Degradation map',
+  style: {
+    fontWeight: 'bold',
+    fontSize: '18px',
+    margin: '0 0 4px 0',
+    padding: '0'
+    }
+});
+
+// Add the title to the panel
+legend2.add(legendTitle2);
+    
+// Creates and styles 1 row of the legend.
+var makeRow2 = function(color, name) {
+      
+      // Create the label that is actually the colored box.
+      var colorBox = ui.Label({
+        style: {
+          backgroundColor: '#' + color,
+          // Use padding to give the box height and width.
+          padding: '8px',
+          margin: '0 0 4px 0'
+        }
+      });
+      
+      // Create the label filled with the description text.
+      var description = ui.Label({
+        value: name,
+        style: {margin: '0 0 4px 6px'}
+      });
+      
+      // return the panel
+      return ui.Panel({
+        widgets: [colorBox, description],
+        layout: ui.Panel.Layout.Flow('horizontal')
+      });
+};
+
+
+//  Palette with the colors
+var palette2 =['4A7E11', 'C71803','6A137A','E5A512'];
+
+// name of the legend
+var names2 = ['Stable forest','Degradation','Deforestation','No forest'];
+
+// Add color and and names
+for (var i = 0; i < 4; i++) {
+  legend2.add(makeRow2(palette2[i], names2[i]));
+  }  
+
+// add legend to map (alternatively you can also print the legend to the console)  
+Map.add(legend2); 
