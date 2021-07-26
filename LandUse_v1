@@ -1,0 +1,70 @@
+// Thibaud's v1
+
+var agroforestry_v1 = ee.Image('users/an-sig/TerraBio/agroforestry_v1');
+Map.addLayer(agroforestry_v1,{bands:['b1'],min:-1,max:7,palette:['0ee1c0','dc0f0f','e79848','eae23e','07660a','6464ef','e633ab','2323c0','9e45ca']},'Land use map 2020');
+
+// legend
+// Land use
+// set position of panel
+var legend = ui.Panel({
+  style: {
+    position: 'bottom-left',
+    padding: '8px 15px'
+  }
+});
+
+// Create legend title
+var legendTitle = ui.Label({
+  value: 'Land use map',
+  style: {
+    fontWeight: 'bold',
+    fontSize: '18px',
+    margin: '0 0 4px 0',
+    padding: '0'
+    }
+});
+
+// Add the title to the panel
+legend.add(legendTitle);
+    
+// Creates and styles 1 row of the legend.
+var makeRow = function(color, name) {
+      
+      // Create the label that is actually the colored box.
+      var colorBox = ui.Label({
+        style: {
+          backgroundColor: '#' + color,
+          // Use padding to give the box height and width.
+          padding: '8px',
+          margin: '0 0 4px 0'
+        }
+      });
+      
+      // Create the label filled with the description text.
+      var description = ui.Label({
+        value: name,
+        style: {margin: '0 0 4px 6px'}
+      });
+      
+      // return the panel
+      return ui.Panel({
+        widgets: [colorBox, description],
+        layout: ui.Panel.Layout.Flow('horizontal')
+      });
+};
+
+
+//  Palette with the colors
+var palette =['0ee1c0','dc0f0f','e79848','eae23e','07660a','6464ef','e633ab','2323c0','9e45ca'];
+
+// name of the legend
+var names = ['No data','Bushland/Grassland','Pasture','Mining','Forest','Agriculture','Urban areas','Water','Cocoa'];
+
+// Add color and and names
+for (var i = 0; i < 9; i++) {
+  legend.add(makeRow(palette[i], names[i]));
+  }  
+
+// add legend to map (alternatively you can also print the legend to the console)  
+Map.add(legend); 
+Map.centerObject(ee.FeatureCollection('users/an-sig/TerraBio/aoi'),9);
