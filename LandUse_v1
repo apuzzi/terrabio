@@ -1,5 +1,3 @@
-// Thibaud's v1
-
 var agroforestry_v1 = ee.Image('users/an-sig/TerraBio/agroforestry_v1');
 Map.addLayer(agroforestry_v1,{bands:['b1'],min:-1,max:7,palette:['0ee1c0','dc0f0f','e79848','eae23e','07660a','6464ef','e633ab','2323c0','9e45ca']},'Land use map 2020');
 
