@@ -235,7 +235,7 @@ var legend3 = ui.Panel({
 
 // Create legend title
 var legendTitle3 = ui.Label({
-  value: 'Agreement cocoa and degradation areas',
+  value: 'Overlap cocoa and degradation',
   style: {
     fontWeight: 'bold',
     fontSize: '18px',
