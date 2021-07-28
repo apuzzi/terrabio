@@ -74,6 +74,17 @@ var cocoa_only_count = cocoa_only_mask.reduceRegion({
 });
 print(cocoa_only_count);
 
+var overlap_mask = overlap.updateMask(overlap.eq(3)).remap([3],[1]);
+Map.addLayer(overlap_mask,{},'overlap masked',false);
+
+var overlap_count = overlap_mask.reduceRegion({
+  reducer: ee.Reducer.count(),
+  geometry: aoi,
+  scale: 100,
+  maxPixels: 1e13
+});
+print(overlap_count);
+
 //////////////////////// Map options /////////////////////////////////////////////////////////
 Map.setOptions('SATELLITE');
 
