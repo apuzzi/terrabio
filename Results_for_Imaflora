@@ -87,6 +87,8 @@ print('Overlap count',overlap_count.get('remapped'));
 
 print('% of cocoa areas within degradation areas',ee.Number(overlap_count.get('remapped')).divide(ee.Number(cocoa_only_count.get('remapped'))).multiply(100));
 
+//////////////// Count of areas classified as cocoa within cocoa polygons ////////////////////////////
+
 //////////////////////// Map options /////////////////////////////////////////////////////////
 Map.setOptions('SATELLITE');
 
