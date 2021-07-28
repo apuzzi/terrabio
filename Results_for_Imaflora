@@ -93,17 +93,18 @@ var pixels_count = cocoa_only.reduceRegion({
   geometry: cocoa,
   scale: 100,
   maxPixels: 1e13
-});
-print('Pixels within cocoa farms',pixels_count);
+}).get('remapped');
+print('Pixels within cocoa farms polygons',pixels_count);
 
 var pixels_cocoa_count = cocoa_only_mask.reduceRegion({
   reducer: ee.Reducer.count(),
   geometry: cocoa,
   scale: 100,
   maxPixels: 1e13
-});
-print('Pixels within cocoa farms',pixels_cocoa_count);
+}).get('remapped');
+print('Pixels within cocoa farms polygons',pixels_cocoa_count);
 
+print('% cocoa polygons classified as cocoa',ee.Number(pixels_count).divide(ee.Number(pixels_cocoa_count)).multiply(100));
 
 //////////////////////// Map options /////////////////////////////////////////////////////////
 Map.setOptions('SATELLITE');
