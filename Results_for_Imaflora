@@ -72,7 +72,7 @@ var cocoa_only_count = cocoa_only_mask.reduceRegion({
   scale: 100,
   maxPixels: 1e13
 });
-print('Cocoa pixel count',cocoa_only_count.get('remapped'));
+//print('Cocoa pixel count',cocoa_only_count.get('remapped'));
 
 var overlap_mask = overlap.updateMask(overlap.eq(3)).remap([3],[1]);
 Map.addLayer(overlap_mask,{},'overlap masked',false);
@@ -83,7 +83,7 @@ var overlap_count = overlap_mask.reduceRegion({
   scale: 100,
   maxPixels: 1e13
 });
-print('Overlap count',overlap_count.get('remapped'));
+//print('Overlap count',overlap_count.get('remapped'));
 
 print('% of cocoa areas within degradation areas',ee.Number(overlap_count.get('remapped')).divide(ee.Number(cocoa_only_count.get('remapped'))).multiply(100));
 
@@ -102,7 +102,7 @@ var pixels_count = cocoa_only.reduceRegion({
   scale: 100,
   maxPixels: 1e13
 }).get('remapped');
-print('Pixels within cocoa farms polygons',pixels_count);
+//print('Pixels within cocoa farms polygons',pixels_count);
 
 var pixels_cocoa_count = cocoa_only_mask.reduceRegion({
   reducer: ee.Reducer.count(),
@@ -110,7 +110,7 @@ var pixels_cocoa_count = cocoa_only_mask.reduceRegion({
   scale: 100,
   maxPixels: 1e13
 }).get('remapped');
-print('Pixels within cocoa farms polygons',pixels_cocoa_count);
+//print('Pixels within cocoa farms polygons',pixels_cocoa_count);
 
 print('% cocoa polygons classified as cocoa',ee.Number(pixels_cocoa_count).divide(ee.Number(pixels_count)).multiply(100));
 
