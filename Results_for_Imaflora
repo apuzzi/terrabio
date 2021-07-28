@@ -57,7 +57,7 @@ var pixelChart_overlap = ui.Chart.image.byClass({
   image: ee.Image(1).addBands(overlap),
   classBand: 'remapped', 
   region: aoi,
-  scale: 30,
+  scale: 100,
   reducer: ee.Reducer.count()
 }).setOptions(options_overlap);
 
@@ -69,7 +69,7 @@ Map.addLayer(cocoa_only_mask,{},'cocoa only masked',false);
 var cocoa_only_count = cocoa_only_mask.reduceRegion({
   reducer: ee.Reducer.count(),
   geometry: aoi,
-  scale: 30,
+  scale: 100,
   maxPixels: 1e13
 });
 print(cocoa_only_count);
