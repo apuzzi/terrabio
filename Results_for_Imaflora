@@ -200,7 +200,7 @@ legend3.add(legendTitle3);
 var palette3 =['FFFFFF','F3FF33','FF0000'];
 
 // name of the legend
-var names3 = ['Cocoa-only','Degradation-only','Overlap'];
+var names3 = ['Cocoa-only (1)','Degradation-only (2)','Overlap (3)'];
 
 // Add color and and names
 for (var i = 0; i < 3; i++) {
