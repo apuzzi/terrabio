@@ -104,7 +104,7 @@ var pixels_cocoa_count = cocoa_only_mask.reduceRegion({
 }).get('remapped');
 print('Pixels within cocoa farms polygons',pixels_cocoa_count);
 
-print('% cocoa polygons classified as cocoa',ee.Number(pixels_count).divide(ee.Number(pixels_cocoa_count)).multiply(100));
+print('% cocoa polygons classified as cocoa',ee.Number(pixels_cocoa_count).divide(ee.Number(pixels_count)).multiply(100));
 
 //////////////////////// Map options /////////////////////////////////////////////////////////
 Map.setOptions('SATELLITE');
