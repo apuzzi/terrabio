@@ -96,7 +96,7 @@ var pixels_count = cocoa_only.reduceRegion({
 });
 print('Pixels within cocoa farms',pixels_count);
 
-var pixels_cocoa_count = cocoa_only_count.reduceRegion({
+var pixels_cocoa_count = cocoa_only_mask.reduceRegion({
   reducer: ee.Reducer.count(),
   geometry: cocoa,
   scale: 100,
