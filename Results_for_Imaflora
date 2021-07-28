@@ -54,7 +54,7 @@ colors: ['FFFFFF','F3FF33','FF0000']
 }; 
 
 var pixelChart_overlap = ui.Chart.image.byClass({
-  image: ee.Image(1).addBands(v1),
+  image: ee.Image(1).addBands(overlap),
   classBand: 'remapped', 
   region: aoi,
   scale: 100,
