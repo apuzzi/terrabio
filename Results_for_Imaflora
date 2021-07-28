@@ -63,6 +63,9 @@ var pixelChart_overlap = ui.Chart.image.byClass({
 
 print(pixelChart_overlap);
 
+var cocoa_only_count = cocoa_only.reduce(ee.Reducer.count());
+print(cocoa_only_count);
+
 //////////////////////// Map options /////////////////////////////////////////////////////////
 Map.setOptions('SATELLITE');
 
