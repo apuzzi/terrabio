@@ -41,8 +41,29 @@ Map.addLayer(degradation_only,{},'degradation only',false);
 // Make cocoa-only pixels 1, degradation-only pixels 2, and add them together. overlap pixels will be 3
 var overlap = cocoa_only.add(degradation_only);
 var overlap = overlap.updateMask(overlap.neq(0));
-Map.addLayer(overlap,{min:1,max:3,palette:['FFFFFF','F3FF33','FF0000']},'cocoa-only white, degradation-only black, overlap red');
+Map.addLayer(overlap,{min:1,max:3,palette:['FFFFFF','F3FF33','FF0000']},'Overlap between cocoa and degradation');
 
+// Calculate number of pixels
+var options_overlap = {
+lineWidth: 1,
+pointSize: 2,
+hAxis: {title: 'Classes'},
+vAxis: {title: 'Num of pixels'},
+title: 'Number of pixels in each class.',
+colors: ['FFFFFF','F3FF33','FF0000']
+}; 
+
+var pixelChart_overlap = ui.Chart.image.byClass({
+  image: ee.Image(1).addBands(v1),
+  classBand: 'remapped', 
+  region: aoi,
+  scale: 100,
+  reducer: ee.Reducer.count()
+}).setOptions(options_overlap);
+
+print(pixelChart_overlap);
+
+//////////////////////// Map options /////////////////////////////////////////////////////////
 Map.setOptions('SATELLITE');
 
 // legend
@@ -134,33 +155,6 @@ var legendTitle2 = ui.Label({
 
 // Add the title to the panel
 legend2.add(legendTitle2);
-    
-// Creates and styles 1 row of the legend.
-var makeRow2 = function(color, name) {
-      
-      // Create the label that is actually the colored box.
-      var colorBox = ui.Label({
-        style: {
-          backgroundColor: '#' + color,
-          // Use padding to give the box height and width.
-          padding: '8px',
-          margin: '0 0 4px 0'
-        }
-      });
-      
-      // Create the label filled with the description text.
-      var description = ui.Label({
-        value: name,
-        style: {margin: '0 0 4px 6px'}
-      });
-      
-      // return the panel
-      return ui.Panel({
-        widgets: [colorBox, description],
-        layout: ui.Panel.Layout.Flow('horizontal')
-      });
-};
-
 
 //  Palette with the colors
 var palette2 =['4A7E11', 'C71803','6A137A','E5A512'];
@@ -170,8 +164,48 @@ var names2 = ['Stable forest','Degradation','Deforestation','No forest'];
 
 // Add color and and names
 for (var i = 0; i < 4; i++) {
-  legend2.add(makeRow2(palette2[i], names2[i]));
+  legend2.add(makeRow(palette2[i], names2[i]));
   }  
 
 // add legend to map (alternatively you can also print the legend to the console)  
 Map.add(legend2); 
+
+
+
+// legend
+// Land use
+// set position of panel
+var legend3 = ui.Panel({
+  style: {
+    position: 'top-right',
+    padding: '8px 15px'
+  }
+});
+
+// Create legend title
+var legendTitle3 = ui.Label({
+  value: 'Agreement cocoa and degradation areas',
+  style: {
+    fontWeight: 'bold',
+    fontSize: '18px',
+    margin: '0 0 4px 0',
+    padding: '0'
+    }
+});
+
+// Add the title to the panel
+legend3.add(legendTitle3);
+    
+//  Palette with the colors
+var palette3 =['FFFFFF','F3FF33','FF0000'];
+
+// name of the legend
+var names3 = ['Cocoa-only','Degradation-only','Overlap'];
+
+// Add color and and names
+for (var i = 0; i < 3; i++) {
+  legend3.add(makeRow(palette3[i], names3[i]));
+  }  
+
+// add legend to map (alternatively you can also print the legend to the console)  
+Map.add(legend3); 
