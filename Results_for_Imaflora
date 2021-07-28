@@ -41,7 +41,7 @@ Map.addLayer(degradation_only,{},'degradation only',false);
 // Make cocoa-only pixels 1, degradation-only pixels 2, and add them together. overlap pixels will be 3
 var overlap = cocoa_only.add(degradation_only);
 var overlap = overlap.updateMask(overlap.neq(0));
-Map.addLayer(overlap,{min:1,max:3,palette:['9733FF','FF33F8','333EFF']},'cocoa-only white, degradation-only black, overlap red');
+Map.addLayer(overlap,{min:1,max:3,palette:['FFFFFF','F3FF33','FF0000']},'cocoa-only white, degradation-only black, overlap red');
 
 Map.setOptions('SATELLITE');
 
