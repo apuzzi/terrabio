@@ -88,8 +88,21 @@ print('Overlap count',overlap_count.get('remapped'));
 print('% of cocoa areas within degradation areas',ee.Number(overlap_count.get('remapped')).divide(ee.Number(cocoa_only_count.get('remapped'))).multiply(100));
 
 //////////////// Count of areas classified as cocoa within cocoa polygons ////////////////////////////
+var pixels_count = cocoa_only.reduceRegion({
+  reducer: ee.Reducer.count(),
+  geometry: cocoa,
+  scale: 100,
+  maxPixels: 1e13
+});
+print('Pixels within cocoa farms',pixels_count);
 
-
+var pixels_cocoa_count = cocoa_only_count.reduceRegion({
+  reducer: ee.Reducer.count(),
+  geometry: cocoa,
+  scale: 100,
+  maxPixels: 1e13
+});
+print('Pixels within cocoa farms',pixels_cocoa_count);
 
 
 //////////////////////// Map options /////////////////////////////////////////////////////////
