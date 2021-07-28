@@ -89,6 +89,9 @@ print('% of cocoa areas within degradation areas',ee.Number(overlap_count.get('r
 
 //////////////// Count of areas classified as cocoa within cocoa polygons ////////////////////////////
 
+
+
+
 //////////////////////// Map options /////////////////////////////////////////////////////////
 Map.setOptions('SATELLITE');
 
