@@ -72,7 +72,7 @@ var cocoa_only_count = cocoa_only_mask.reduceRegion({
   scale: 100,
   maxPixels: 1e13
 });
-print(cocoa_only_count);
+print('Cocoa pixel count',cocoa_only_count.get('remapped'));
 
 var overlap_mask = overlap.updateMask(overlap.eq(3)).remap([3],[1]);
 Map.addLayer(overlap_mask,{},'overlap masked',false);
@@ -83,7 +83,9 @@ var overlap_count = overlap_mask.reduceRegion({
   scale: 100,
   maxPixels: 1e13
 });
-print(overlap_count);
+print('Overlap count',overlap_count.get('remapped'));
+
+print('% of cocoa areas within degradation areas',ee.Number(overlap_count.get('remapped')).divide(ee.Number(cocoa_only_count.get('remapped'))).multiply(100));
 
 //////////////////////// Map options /////////////////////////////////////////////////////////
 Map.setOptions('SATELLITE');
