@@ -87,13 +87,13 @@ var overlap_count = overlap_mask.reduceRegion({
 
 print('% of cocoa areas within degradation areas',ee.Number(overlap_count.get('remapped')).divide(ee.Number(cocoa_only_count.get('remapped'))).multiply(100));
 
-Export.image.toDrive({
-  image:overlap,
-  scale:30,
-  region:aoi,
-  description: 'overlap',
-  fileNamePrefix: 'overlap'
-});
+// Export.image.toDrive({
+//   image:overlap,
+//   scale:30,
+//   region:aoi,
+//   description: 'overlap',
+//   fileNamePrefix: 'overlap'
+// });
 
 //////////////// Count of areas classified as cocoa within cocoa polygons ////////////////////////////
 var pixels_count = cocoa_only.reduceRegion({
