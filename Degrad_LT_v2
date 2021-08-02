@@ -74,7 +74,7 @@ var combinedMap = function(result,index) {
   // Display the change attribute map (specifically year of disturbance-yor-)
   Map.addLayer(changeImg.select(['yod']).clip(aoi), yodVizParms, String(index));
   //Export results
-  exportResults(changeImg,index,outName,outFolder);
+  exportResults(changeImg,index,outName);
 };
 
 // Function for exporting data 
