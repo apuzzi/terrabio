@@ -97,17 +97,15 @@ var properties = ee.FeatureCollection('users/an-sig/TerraBio/Imaflora_properties
 Map.addLayer(properties,{},'Imaflora Properties',false);
 
 // Planet imagery
-var planet_19_20 = ee.ImageCollection('projects/ee-an-sig/assets/TerraBio/planet').median();
-var planet_21_06 = ee.ImageCollection('projects/ee-an-sig/assets/TerraBio/planet_2021-06').median();
-
-Map.addLayer(planet_19_20,{bands:['blue','green','red'],min:250,max:1200},'Planet 2019-12_2020-05 mosaic',false);
-Map.addLayer(planet_21_06,{bands:['blue','green','red'],min:280,max:1600},'Planet 2021-06 mosaic',false);
+var planet = ee.ImageCollection('projects/servir-amazonia/TerraBio/ImageCollections/Planet');
+print('Planet basemaps',planet);
 
 
 
 
 
 
+///////////////////// Legends set up ////////////////////////////////////////////////////////
 
 // legend
 // Land use
