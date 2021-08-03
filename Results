@@ -9,8 +9,8 @@ var mapBiomas = ee.ImageCollection.fromImages(mapBiomasImg.bandNames().map(funct
   return img.set('year',ee.Number.parse(ee.String(band).slice(15)));
 }));
 var mapBiomas_fil = mapBiomas.filter(ee.Filter.and(//Creates an collection containing the years within the study period
-  ee.Filter.gte('year', startYear),
-  ee.Filter.lte('year', endYear)));
+  ee.Filter.gte('year', 2000),
+  ee.Filter.lte('year', 2019)));
 // Function for detecting pixels covered by forest 
 //forest is 3 or 6
 var forest = function (image) {
