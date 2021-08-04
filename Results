@@ -41,7 +41,7 @@ var codedv1 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio3thou2010
 Map.addLayer(codedv1,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v1',false);
 
 var codedv2 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio2000mask_fullparams_postpros');
-Map.addLayer(codedv2,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v2');
+Map.addLayer(codedv2,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v2',false);
 
 // Forest is green (1), Degradation is red (2), deforestation is purple (3), Non-forest is orange (4)
 
