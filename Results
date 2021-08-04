@@ -40,10 +40,13 @@ var LTv2 = LTv2.updateMask(LTv2.neq(0));
 Map.addLayer(LTv2,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT v2',false);
 
 var LTv2Masked = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2_NF2000masked');
-Map.addLayer(LTv2Masked,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT v2 masked',false);
+Map.addLayer(LTv2Masked,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT v2 masked');
 
 var LTv2MaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2_NF2000masked_dist');
-Map.addLayer(LTv2MaskedDegradDefor,{bands:['dist'],min:2,max:3, palette:['C71803','6A137A']},'LT v2 masked degrad&deforest',false);
+Map.addLayer(LTv2MaskedDegradDefor,{bands:['dist'],min:2,max:3, palette:['C71803','6A137A']},'LT v2 masked degrad&deforest');
+
+var LTv2MaskedDegradDefor2 = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2_NF2000masked_dist').select('dist').unmask().where(FNF2000.not(),4).remap([0,2,3,4],[1,2,3,4]);
+Map.addLayer(LTv2MaskedDegradDefor2,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v2 masked degrad&deforest');
 
 var codedv1 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio3thou2010_postpros_v2');
 Map.addLayer(codedv1,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v1',false);
