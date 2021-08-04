@@ -46,7 +46,27 @@ var changeParams = {
 };
 
 // Defines an output name that will be added after these identifiers: LT_(input variable)_
-var outName = "loss_v2";
+var outName1 = "loss_v2";
+var outName2 = "loss_v2_NF2000masked";
+var outName3 = "loss_v2_NF2000masked_dist";
+
+
+// Forest non forest mask
+var mapBiomasImg = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1'); // Annual Land Cover 
+var mapBiomas = ee.ImageCollection.fromImages(mapBiomasImg.bandNames().map(function(band){
+  var img = ee.Image(mapBiomasImg.select(ee.String(band))).rename('b1');
+  return img.set('year',ee.Number.parse(ee.String(band).slice(15)));
+}));
+var mapBiomas_fil = mapBiomas.filter(ee.Filter.and(//Creates an collection containing the years within the study period
+  ee.Filter.gte('year', 2000),
+  ee.Filter.lte('year', 2019)));
+// Function for detecting pixels covered by forest 
+//forest is 3 or 6
+var forest = function (image) {
+  return image.eq(3).or(image.eq(6)).rename("landcover").clip(aoi).set('year',image.get('year'))};
+var forestCol = mapBiomas.map(forest);
+var FNF2000 = forestCol.filterMetadata('year','equals',2000).first();
+var FNF2019 = forestCol.filterMetadata('year','equals',2019).first();
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,13 +94,15 @@ var combinedMap = function(result,index) {
   // Display the change attribute map (specifically year of disturbance-yor-)
   Map.addLayer(changeImg.select(['yod']).clip(aoi), yodVizParms, String(index));
   //Export results
-  exportResults(changeImg,index,outName);
+  exportResults(changeImg.clip(aoi).short(),index,outName1); // output
+  exportResults(changeImg.clip(aoi).updateMask(FNF2000.eq(1)).short(),index,outName2); // output with non-forested areas in 2000 masked
+  exportResults(changeImg.clip(aoi).updateMask(FNF2000.eq(1)).select('yod').not().where(FNF2019,2).remap([0,2],[3,2]).rename('dist').addBands(changeImg).short(),index,outName3); // output with non-forested areas in 2000 masked and disturbances post classified into degradation and deforestation
 };
 
 // Function for exporting data 
 var  exportResults = function (img, index, name){
     Export.image.toAsset({
-    image: img.clip(aoi).unmask(0).short(), 
+    image: img, 
     description: 'LT_'+String(index)+'_'+name,
     assetId: 'users/an-sig/TerraBio/LT_'+String(index)+'_'+name, 
     region: aoi, 
