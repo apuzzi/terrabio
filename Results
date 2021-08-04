@@ -40,10 +40,10 @@ var LTv2 = LTv2.updateMask(LTv2.neq(0));
 Map.addLayer(LTv2,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT v2',false);
 
 var LTv2Masked = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2_NF2000masked');
-Map.addLayer(LTv2Masked,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT v2 masked');
+Map.addLayer(LTv2Masked,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT v2 masked',false);
 
 var LTv2MaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2_NF2000masked_dist');
-Map.addLayer(LTv2MaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v2 masked degrad&deforest');
+Map.addLayer(LTv2MaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v2 masked degrad&deforest',false);
 
 var codedv1 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio3thou2010_postpros_v2');
 Map.addLayer(codedv1,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v1',false);
@@ -86,6 +86,7 @@ Map.addLayer(codedv2,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A1
 //var sec = ee.Image('users/celsohlsj/public/secondary_forest_extent_collection5_v3').clip(aoi);
 var sec = ee.Image('users/celsohlsj/public/secondary_forest_increment_collection5_v3').clip(aoi);
 print('Restoration dataset',sec);
+Map.addLayer(sec.reduce(ee.Reducer.sum()),{},'Restoration')
 Map.addLayer(sec,{bands:['classification_2000'],min:0,max:1},'Sec Forest 2000 (recovery 99-00)',false);
 Map.addLayer(sec,{bands:['classification_2010'],min:0,max:1},'Sec Forest 2010 (recovery 09-10)',false);
 Map.addLayer(sec,{bands:['classification_2019'],min:0,max:1},'Sec Forest 2019 (recovery 18-19)',false);
