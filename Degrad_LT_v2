@@ -4,7 +4,7 @@
 /// This particular piece of code to obtain LandTrendr outputs was writen by Y. Reygadas and V. Galati //
 // Adapted by Andrea Nicolau for TerraBio project
 
-/////////////////////////////////// User-definded information ///////////////////////////////////////////
+/////////////////////////////////// User-defined information ///////////////////////////////////////////
 // Defines the input variable (s)
 var indices = ['NDFI']; // Input variable(s) to be segmented
 
