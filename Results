@@ -133,8 +133,8 @@ var legendTitle = ui.Label({
   value: 'Land use map',
   style: {
     fontWeight: 'bold',
-    fontSize: '18px',
-    margin: '0 0 4px 0',
+    fontSize: '14px',
+    margin: '0 0 2px 0',
     padding: '0'
     }
 });
@@ -199,8 +199,8 @@ var legendTitle2 = ui.Label({
   value: 'Degradation map',
   style: {
     fontWeight: 'bold',
-    fontSize: '18px',
-    margin: '0 0 4px 0',
+    fontSize: '14px',
+    margin: '0 0 2px 0',
     padding: '0'
     }
 });
@@ -269,8 +269,8 @@ var legendTitle3 = ui.Label({
 value: 'Year of disturbance (LT)',
 style: {
 fontWeight: 'bold',
-fontSize: '18px',
-margin: '0 0 4px 0',
+fontSize: '14px',
+margin: '0 0 2px 0',
 padding: '0'
 }
 });
@@ -295,7 +295,7 @@ legend3.add(panel);
 // create thumbnail from the image
 var thumbnail = ui.Thumbnail({
 image: legendImage,
-params: {bbox:'0,0,10,100', dimensions:'10x200'},
+params: {bbox:'0,0,10,100', dimensions:'5x100'},
 style: {padding: '1px', position: 'bottom-center'}
 });
  
