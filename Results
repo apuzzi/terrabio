@@ -2,7 +2,7 @@
 var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
 Map.centerObject(aoi,8);
 
-// Forest mask 2019
+// Forest mask
 var mapBiomasImg = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1'); // Annual Land Cover 
 var mapBiomas = ee.ImageCollection.fromImages(mapBiomasImg.bandNames().map(function(band){
   var img = ee.Image(mapBiomasImg.select(ee.String(band))).rename('b1');
@@ -35,7 +35,14 @@ Map.addLayer(v3,{min: 1, max: 4, palette:['4A7E11', 'C71803','6A137A','E5A512']}
 // Map.addLayer(LTv1.updateMask(LTv1.neq(0)),{bands:['yod'],min:2000,max:2020,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT v1',false);
 
 var LTv2 = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2');
-Map.addLayer(LTv2.updateMask(LTv2.neq(0)),{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT v2',false);
+var LTv2 = LTv2.updateMask(LTv2.neq(0));
+Map.addLayer(LTv2,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT v2',false);
+
+var LTv2Masked = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2_NF2000masked');
+Map.addLayer(LTv2Masked,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT v2 masked',false);
+
+var LTv2MaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2_NF2000masked_dist');
+Map.addLayer(LTv2MaskedDegradDefor,{bands:['dist'],min:2,max:3, palette:['C71803','6A137A']},'LT v2 masked degrad&deforest',false);
 
 var codedv1 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio3thou2010_postpros_v2');
 Map.addLayer(codedv1,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v1',false);
