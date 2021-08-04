@@ -270,7 +270,7 @@ padding: '8px 15px'
  
 // Create legend title
 var legendTitle3 = ui.Label({
-value: 'Year of disturbance (LT)',
+value: 'Year of disturbance or restoration (LT)',
 style: {
 fontWeight: 'bold',
 fontSize: '14px',
