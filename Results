@@ -93,7 +93,7 @@ Map.addLayer(sec,{bands:['classification_2019'],min:0,max:1},'Sec Forest 2019 (r
 
 var LTgain_v1 = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v1');
 var LTgain_v1 = LTgain_v1.updateMask(LTgain_v1.neq(0));
-Map.addLayer(LTgain_v1,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT gain v1',false);
+Map.addLayer(LTgain_v1,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT gain v1');
 
 ///////////////////////////// Land use map //////////////////////////////////////////////////////
 // Thibaud's v1
