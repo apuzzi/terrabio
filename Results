@@ -22,6 +22,7 @@ Map.addLayer(FNF2000,{min:0,max:1}, 'Forest / Non-Forest 2000',false);
 Map.addLayer(FNF2019,{min:0,max:1}, 'Forest / Non-Forest 2019',false);
 
 ///////////////////////////////// Degradation results ///////////////////////////////////////
+
 var v1 = ee.Image('users/an-sig/TerraBio/DegradML_v1').unmask(4).clip(aoi);
 Map.addLayer(v1,{min: 1, max: 4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'ML v1',false);
 
@@ -52,34 +53,34 @@ Map.addLayer(codedv2,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A1
 
 // Forest is green (1), Degradation is red (2), deforestation is purple (3), Non-forest is orange (4)
 
-var options = {
-lineWidth: 1,
-pointSize: 2,
-hAxis: {title: 'Classes'},
-vAxis: {title: 'Num of pixels'},
-title: 'Number of pixels in each class.',
-colors: ['4A7E11', 'C71803','6A137A','E5A512']
-}; 
+// var options = {
+// lineWidth: 1,
+// pointSize: 2,
+// hAxis: {title: 'Classes'},
+// vAxis: {title: 'Num of pixels'},
+// title: 'Number of pixels in each class.',
+// colors: ['4A7E11', 'C71803','6A137A','E5A512']
+// }; 
 
-var pixelChart1 = ui.Chart.image.byClass({
-  image: ee.Image(1).addBands(v1),
-  classBand: 'classification', 
-  region: aoi,
-  scale: 100,
-  reducer: ee.Reducer.count()
-}).setOptions(options);
+// var pixelChart1 = ui.Chart.image.byClass({
+//   image: ee.Image(1).addBands(v1),
+//   classBand: 'classification', 
+//   region: aoi,
+//   scale: 100,
+//   reducer: ee.Reducer.count()
+// }).setOptions(options);
 
-print(pixelChart1);
+// print(pixelChart1);
 
-var pixelChart2 = ui.Chart.image.byClass({
-  image: ee.Image(1).addBands(v2),
-  classBand: 'classification', 
-  region: aoi,
-  scale: 100,
-  reducer: ee.Reducer.count()
-}).setOptions(options);
+// var pixelChart2 = ui.Chart.image.byClass({
+//   image: ee.Image(1).addBands(v2),
+//   classBand: 'classification', 
+//   region: aoi,
+//   scale: 100,
+//   reducer: ee.Reducer.count()
+// }).setOptions(options);
 
-print(pixelChart2);
+// print(pixelChart2);
 
 /////////////////////////////// Restoration dataset ////////////////////////////////////////
 //var sec = ee.Image('users/celsohlsj/public/secondary_forest_extent_collection5_v3').clip(aoi);
@@ -117,7 +118,7 @@ print('Planet basemaps',planet);
 
 ///////////////////// Legends set up ////////////////////////////////////////////////////////
 
-// legend
+///////////////////////////////////////////
 // Land use
 // set position of panel
 var legend = ui.Panel({
@@ -182,7 +183,7 @@ for (var i = 0; i < 9; i++) {
 // add legend to map (alternatively you can also print the legend to the console)  
 Map.add(legend); 
 
-
+/////////////////////////////////////////////////////
 
 // Degradation map
 // set position of panel
@@ -247,3 +248,67 @@ for (var i = 0; i < 4; i++) {
 
 // add legend to map (alternatively you can also print the legend to the console)  
 Map.add(legend2); 
+
+////////////////////////////////////////////
+
+// LT year of detection
+
+// create vizualization parameters
+var viz = {min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']};
+
+// set position of panel
+var legend3 = ui.Panel({
+style: {
+position: 'top-right',
+padding: '8px 15px'
+}
+});
+ 
+// Create legend title
+var legendTitle3 = ui.Label({
+value: 'Year of disturbance (LT)',
+style: {
+fontWeight: 'bold',
+fontSize: '18px',
+margin: '0 0 4px 0',
+padding: '0'
+}
+});
+ 
+// Add the title to the panel
+legend3.add(legendTitle3);
+ 
+// create the legend image
+var lon = ee.Image.pixelLonLat().select('latitude');
+var gradient = lon.multiply((viz.max-viz.min)/100.0).add(viz.min);
+var legendImage = gradient.visualize(viz);
+ 
+// create text on top of legend
+var panel = ui.Panel({
+widgets: [
+ui.Label(viz['max'])
+],
+});
+ 
+legend3.add(panel);
+ 
+// create thumbnail from the image
+var thumbnail = ui.Thumbnail({
+image: legendImage,
+params: {bbox:'0,0,10,100', dimensions:'10x200'},
+style: {padding: '1px', position: 'bottom-center'}
+});
+ 
+// add the thumbnail to the legend
+legend3.add(thumbnail);
+ 
+// create text on top of legend
+var panel = ui.Panel({
+widgets: [
+ui.Label(viz['min'])
+],
+});
+ 
+legend3.add(panel);
+ 
+Map.add(legend3);
