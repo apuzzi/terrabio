@@ -42,7 +42,7 @@ var restoration2000_2019 = forest2000.remap([0,1],[0,2]).add(forest2019).remap([
 Map.addLayer(restoration2000_2010,{min:0,max:1},'Restoration 2000-2010',false);
 Map.addLayer(restoration2010_2019,{min:0,max:1},'Restoration 2010-2019',false);
 Map.addLayer(restoration2000_2019,{min:0,max:1},'Restoration 2000-2019',false);
-Map.addLayer(restoration2000_2010.add(restoration2010_2019),'Restoration 2000-2019 accounting for disturbances followed by restoration in between',false);
+Map.addLayer(restoration2000_2010.add(restoration2010_2019),{min:0,max:1},'Restoration 2000-2019 accounting for disturbances followed by restoration in between',false);
 
 var LTgain_v1 = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v1');
 var LTgain_v1 = LTgain_v1.updateMask(LTgain_v1.neq(0));
