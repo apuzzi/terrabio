@@ -48,3 +48,7 @@ Map.addLayer(restoration2000_2010.add(restoration2010_2019),{min:0,max:1},'Resto
 var LTgain_v1 = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v1');
 var LTgain_v1 = LTgain_v1.updateMask(LTgain_v1.neq(0));
 Map.addLayer(LTgain_v1,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT gain v1',false);
+
+var LTgain_v2 = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v2');
+var LTgain_v2 = LTgain_v2.updateMask(LTgain_v2.neq(0));
+Map.addLayer(LTgain_v2,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT gain v2',false);
