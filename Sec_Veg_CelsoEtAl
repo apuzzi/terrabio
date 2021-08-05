@@ -6,7 +6,8 @@ var sec = ee.Image('users/celsohlsj/public/secondary_forest_extent_collection5_v
 // 0. MapBiomas Data (Colection 4.1)
 var brazil = ee.FeatureCollection("users/celsohlsj/brazil");
 var mapbiomas = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1').byte();
-Map.addLayer(mapbiomas,{},'mapbiomas')
+Map.addLayer(mapbiomas,{},'mapbiomas',false);
+
 // 1. Reclassifying MapBiomas Data #Step 1
 var oldvalues = ee.List([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33]);
 var newvalues = ee.List([0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
