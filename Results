@@ -92,12 +92,12 @@ Map.addLayer(codedv2,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A1
 
 /////////////////////////////// Restoration dataset & results ////////////////////////////////////////
 //var sec = ee.Image('users/celsohlsj/public/secondary_forest_extent_collection5_v3').clip(aoi);
-var sec = ee.Image('users/celsohlsj/public/secondary_forest_increment_collection5_v3').clip(aoi);
-print('Restoration dataset',sec);
+// var sec = ee.Image('users/celsohlsj/public/secondary_forest_increment_collection5_v3').clip(aoi);
+// print('Restoration dataset',sec);
 
-Map.addLayer(sec,{bands:['classification_2000'],min:0,max:1},'Sec Forest 2000 (recovery 99-00)',false);
-Map.addLayer(sec,{bands:['classification_2010'],min:0,max:1},'Sec Forest 2010 (recovery 09-10)',false);
-Map.addLayer(sec,{bands:['classification_2019'],min:0,max:1},'Sec Forest 2019 (recovery 18-19)',false);
+// Map.addLayer(sec,{bands:['classification_2000'],min:0,max:1},'Sec Forest 2000 (recovery 99-00)',false);
+// Map.addLayer(sec,{bands:['classification_2010'],min:0,max:1},'Sec Forest 2010 (recovery 09-10)',false);
+// Map.addLayer(sec,{bands:['classification_2019'],min:0,max:1},'Sec Forest 2019 (recovery 18-19)',false);
 
 var LTgain_v1 = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v1');
 var LTgain_v1 = LTgain_v1.updateMask(LTgain_v1.neq(0));
