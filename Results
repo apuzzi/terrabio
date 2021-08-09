@@ -82,6 +82,14 @@ Map.addLayer(codedv2,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A1
 
 // print(pixelChart2);
 
+// var pixels_count = cocoa_only.reduceRegion({
+//   reducer: ee.Reducer.count(),
+//   geometry: cocoa,
+//   scale: 100,
+//   maxPixels: 1e13
+// }).get('remapped');
+// print('Pixels within cocoa farms polygons',pixels_count);
+
 /////////////////////////////// Restoration dataset & results ////////////////////////////////////////
 //var sec = ee.Image('users/celsohlsj/public/secondary_forest_extent_collection5_v3').clip(aoi);
 var sec = ee.Image('users/celsohlsj/public/secondary_forest_increment_collection5_v3').clip(aoi);
@@ -97,7 +105,7 @@ Map.addLayer(LTgain_v1,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa50
 
 var LTgain_v2 = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v2');
 var LTgain_v2 = LTgain_v2.updateMask(LTgain_v2.neq(0));
-Map.addLayer(LTgain_v2,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT gain v2');
+Map.addLayer(LTgain_v2,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT gain v2',false);
 
 ///////////////////////////// Land use map //////////////////////////////////////////////////////
 // Thibaud's v1
