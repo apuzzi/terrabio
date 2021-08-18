@@ -21,6 +21,9 @@ var FNF2019 = forestCol.filterMetadata('year','equals',2019).first();
 Map.addLayer(FNF2000,{min:0,max:1}, 'Forest / Non-Forest 2000',false);
 Map.addLayer(FNF2019,{min:0,max:1}, 'Forest / Non-Forest 2019',false);
 
+// ML forest mask (non forest during whole study period, rest is forest)
+var FNF = ee.Image('users/an-sig/TerraBio/MapBiomasFNF');
+
 ///////////////////////////////// Degradation results ///////////////////////////////////////
 
 var v1 = ee.Image('users/an-sig/TerraBio/DegradML_v1').unmask(4).clip(aoi);
@@ -44,6 +47,9 @@ Map.addLayer(LTv2Masked,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa5
 
 var LTv2MaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2_NF2000masked_dist');
 Map.addLayer(LTv2MaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v2 masked degrad&deforest',false);
+
+var LTv2NotMaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2_NFML_dist');
+Map.addLayer(LTv2NotMaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v2 not-masked degrad&deforest');
 
 var codedv1 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio3thou2010_postpros_v2');
 Map.addLayer(codedv1,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v1',false);
