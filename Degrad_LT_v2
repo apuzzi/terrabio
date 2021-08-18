@@ -49,6 +49,7 @@ var changeParams = {
 var outName1 = "loss_v2";
 var outName2 = "loss_v2_NF2000masked";
 var outName3 = "loss_v2_NF2000masked_dist";
+var outName4 = "loss_v2_NFML_dist";
 
 
 // Forest non forest mask
@@ -68,6 +69,8 @@ var forestCol = mapBiomas.map(forest);
 var FNF2000 = forestCol.filterMetadata('year','equals',2000).first();
 var FNF2019 = forestCol.filterMetadata('year','equals',2019).first();
 
+// ML forest mask (non forest during whole study period, rest is forest)
+var FNF = ee.Image('users/an-sig/TerraBio/MapBiomasFNF');
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Require the LandTrendR Library that has NDFI added
@@ -95,6 +98,7 @@ var combinedMap = function(result,index) {
   Map.addLayer(changeImg.select(['yod']).clip(aoi), yodVizParms, String(index));
   //Export results
   exportResults(changeImg.clip(aoi).short(),index,outName1); // output
+  exportResults(changeImg.clip(aoi).select('yod').not().where(FNF2019,2).remap([0,2],[3,2]).rename('dist').select('dist').unmask().where(FNF.not(),4).remap([0,2,3,4],[1,2,3,4]).addBands(changeImg).short(),index,outName4);
   exportResults(changeImg.clip(aoi).updateMask(FNF2000.eq(1)).short(),index,outName2); // output with non-forested areas in 2000 masked
   exportResults(changeImg.clip(aoi).updateMask(FNF2000.eq(1)).select('yod').not().where(FNF2019,2).remap([0,2],[3,2]).rename('dist').select('dist').unmask().where(FNF2000.not(),4).remap([0,2,3,4],[1,2,3,4]).addBands(changeImg).short(),index,outName3); // output with non-forested areas in 2000 masked and disturbances post classified into degradation and deforestation
 };
