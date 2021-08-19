@@ -11,4 +11,9 @@ var samplingPts = img.stratifiedSample({
 print(samplingPts);
 Map.addLayer(samplingPts);
 
-var degrad = samplingPts.filterMetadata('remapped','equals',1);
+var samplingPts = samplingPts.filterMetadata('remapped','equals',1).map(function(ft){
+  return ft.set('class','Degradation')})
+  .merge(samplingPts.filterMetadata('remapped','equals',2).map(function(ft){
+  return ft.set('class','Deforestation')}))
+  .merge(samplingPts.filterMetadata('remapped','equals',3).map(function(ft){
+  return ft.set('class','StableForest')}));
