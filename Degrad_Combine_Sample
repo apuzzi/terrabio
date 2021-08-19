@@ -19,3 +19,9 @@ print(samplingPts);
 Map.addLayer(samplingPts);
 
 Map.centerObject(samplingPts,8);
+
+Export.table.toDrive({
+  collection:samplingPts,
+  description: 'degradation_sample',
+  fileNamePrefix: 'degradation_sample'
+});
