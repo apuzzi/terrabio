@@ -1,0 +1,14 @@
+var img = ee.Image('users/an-sig/TerraBio/Degrad_combined_v1');
+
+var samplingPts = img.stratifiedSample({
+  numPoints: 0,
+  classValues: [1,2,3], // pixel values to be sampled
+  classPoints: [20,20,20], // number of sample points for each of the above classes
+  scale: 30, // Landsat spatial resolution
+  geometries: true, // retains the spatial information of the sample points
+});
+
+print(samplingPts);
+Map.addLayer(samplingPts);
+
+var degrad = samplingPts.filterMetadata('remapped','equals',1);
