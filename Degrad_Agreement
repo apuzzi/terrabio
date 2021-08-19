@@ -18,3 +18,12 @@ Map.addLayer(lt,{min: 100, max: 300, palette:['4A7E11', 'C71803','6A137A']},'LT'
 
 var combine = ml.add(coded).add(lt).remap([112, 121, 122, 132, 211, 212, 213, 221, 222, 223, 231, 232, 233, 312, 321, 322, 332,113, 131, 133, 311, 313, 311, 331, 333,111],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3]);
 Map.addLayer(combine,{min: 1, max: 3, palette:['C71803','6A137A','4A7E11']},'Combined');
+
+Export.image.toAsset({
+  image: combine,
+  scale: 30,
+  region: aoi,
+  maxPixels: 1e13,
+  description: 'degrad_combined_v1',
+  assetId: 'users/an-sig/TerraBio/Degrad_combined_v1'
+});
