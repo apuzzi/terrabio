@@ -19,11 +19,12 @@ Map.addLayer(lt,{min: 100, max: 300, palette:['4A7E11', 'C71803','6A137A']},'LT'
 var combine = ml.add(coded).add(lt);
 var combine2 = combine.remap([111,222,333],[111,222,333]);
 Map.addLayer(combine2,{},'Combination');
-var combineNot = combine2.not();
-Map.addLayer(combineNot)
+var disagreement = combine2.unmask().not().not();
+Map.addLayer(disagreement);
 
 
-var degrad = combine.eq(111);
-Map.addLayer(degrad,{},'Degradation agreement');
-var def = combine.eq(222);
-Map.addLayer(def,{},'Deforestation agreement');
+var degrad = combine.eq(222);
+Map.addLayer(degrad,{},'Degradation agreement',false);
+var def = combine.eq(333);
+Map.addLayer(def,{},'Deforestation agreement',false);
+var forest = combine.eq(111);
