@@ -1,0 +1,25 @@
+var celso = ee.Image('users/an-sig/TerraBio/CelsoEtAl_restoration_2000-2019_');
+
+var samplingPts = celso.stratifiedSample({
+  numPoints: 0,
+  classValues: [0,1], // pixel values to be sampled
+  classPoints: [25,25], // number of sample points for each of the above classes
+  scale: 30, // Landsat spatial resolution
+  geometries: true, // retains the spatial information of the sample points
+});
+
+var samplingPts = samplingPts.filterMetadata('restoration2000_2019','equals',0).map(function(ft){
+  return ft.set('class','No restoration')})
+  .merge(samplingPts.filterMetadata('restoration2000_2019','equals',1).map(function(ft){
+  return ft.set('class','Restoration')}));
+  
+print(samplingPts);
+Map.addLayer(samplingPts);
+
+Map.centerObject(samplingPts,8);
+
+Export.table.toDrive({
+  collection:samplingPts,
+  description: 'restoration_sample',
+  fileNamePrefix: 'restoration_sample'
+});
