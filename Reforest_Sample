@@ -1,4 +1,4 @@
-var celso = ee.Image('users/an-sig/TerraBio/CelsoEtAl_restoration_2000-2019_');
+var celso = ee.Image('users/an-sig/TerraBio/CelsoEtAl_restoration_2000-2019_').rename(['restoration2000_2019']);
 
 var samplingPts = celso.stratifiedSample({
   numPoints: 0,
@@ -7,7 +7,7 @@ var samplingPts = celso.stratifiedSample({
   scale: 30, // Landsat spatial resolution
   geometries: true, // retains the spatial information of the sample points
 });
-
+print(samplingPts);
 var samplingPts = samplingPts.filterMetadata('restoration2000_2019','equals',0).map(function(ft){
   return ft.set('class','No restoration')})
   .merge(samplingPts.filterMetadata('restoration2000_2019','equals',1).map(function(ft){
