@@ -50,6 +50,7 @@ Export.image.toAsset({
   image:restoration2000_2019,
   scale:30,
   maxPixels:1e13,
+  region: aoi,
   description:'restoration2000_2019',
   assetId:'users/an-sig/TerraBio/CelsoEtAl_restoration_2000-2019'
 });
@@ -58,6 +59,7 @@ Export.image.toAsset({
   image:restoration2000_2019_,
   scale:30,
   maxPixels:1e13,
+  region: aoi,
   description:'restoration2000_2019_',
   assetId:'users/an-sig/TerraBio/CelsoEtAl_restoration_2000-2019_'
 });
