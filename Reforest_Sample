@@ -1,5 +1,5 @@
 var celso = ee.Image('users/an-sig/TerraBio/CelsoEtAl_restoration_2000-2019_');
-
+Map.addLayer(celso)
 var samplingPts = celso.stratifiedSample({
   numPoints: 0,
   classValues: [0,1], // pixel values to be sampled
@@ -8,10 +8,10 @@ var samplingPts = celso.stratifiedSample({
   geometries: true, // retains the spatial information of the sample points
 });
 
-var samplingPts = samplingPts.filterMetadata('restoration2000_2019','equals',0).map(function(ft){
-  return ft.set('class','No restoration')})
-  .merge(samplingPts.filterMetadata('restoration2000_2019','equals',1).map(function(ft){
-  return ft.set('class','Restoration')}));
+// var samplingPts = samplingPts.filterMetadata('restoration2000_2019','equals',0).map(function(ft){
+//   return ft.set('class','No restoration')})
+//   .merge(samplingPts.filterMetadata('restoration2000_2019','equals',1).map(function(ft){
+//   return ft.set('class','Restoration')}));
   
 print(samplingPts);
 Map.addLayer(samplingPts);
