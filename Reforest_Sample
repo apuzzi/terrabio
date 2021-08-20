@@ -7,7 +7,8 @@ var samplingPts = celso.stratifiedSample({
   scale: 30, // Landsat spatial resolution
   geometries: true, // retains the spatial information of the sample points
 });
-print(samplingPts);
+//print(samplingPts);
+
 var samplingPts = samplingPts.filterMetadata('restoration2000_2019','equals',0).map(function(ft){
   return ft.set('class','No restoration')})
   .merge(samplingPts.filterMetadata('restoration2000_2019','equals',1).map(function(ft){
@@ -16,10 +17,36 @@ var samplingPts = samplingPts.filterMetadata('restoration2000_2019','equals',0).
 print(samplingPts);
 Map.addLayer(samplingPts);
 
-Map.centerObject(samplingPts,8);
+
+var lt = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v1');
+var lt_not = lt.not().not().select('yod').rename(['class']).addBands(lt);
+
+var samplingPts2 = lt_not.stratifiedSample({
+  numPoints: 0,
+  classValues: [0,1], // pixel values to be sampled
+  classPoints: [25,25], // number of sample points for each of the above classes
+  scale: 30, // Landsat spatial resolution
+  geometries: true, // retains the spatial information of the sample points
+});
+//print(samplingPts2);
+
+var samplingPts2 = samplingPts2.filterMetadata('class','equals',0).map(function(ft){
+  return ft.set('class','No restoration')})
+  .merge(samplingPts2.filterMetadata('class','equals',1).map(function(ft){
+  return ft.set('class','Restoration')}));
+
+print(samplingPts2);
+Map.addLayer(samplingPts2);
+
+var samplingPtsAll = samplingPts.merge(samplingPts2);
+
+print(samplingPtsAll);
+Map.addLayer(samplingPtsAll);
+
+Map.centerObject(samplingPtsAll,8);
 
 Export.table.toDrive({
-  collection:samplingPts,
+  collection:samplingPtsAll,
   description: 'restoration_sample',
   fileNamePrefix: 'restoration_sample'
 });
