@@ -1,5 +1,5 @@
 var celso = ee.Image('users/an-sig/TerraBio/CelsoEtAl_restoration_2000-2019_');
-Map.addLayer(celso)
+
 var samplingPts = celso.stratifiedSample({
   numPoints: 0,
   classValues: [0,1], // pixel values to be sampled
