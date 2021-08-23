@@ -1,0 +1,27 @@
+var img = ee.Image("users/an-sig/TerraBio/agroforestry_v1").rename('landcover')
+print(img.projection().nominalScale())
+var samples = img.stratifiedSample(
+  {numPoints:2,
+  classValues:[-1,0,1,2,3,4,5,6,7],
+  classPoints:[0,2,2,2,2,2,2,2,2],
+  scale:5,
+  seed:1,
+ geometries:true,})
+print(ee.List(samples.aggregate_array('landcover')).distinct())
+var ceo_samples = samples.map(ceoClean)
+print(ceo_samples.limit(10))
+Map.addLayer(ceo_samples)
+Map.addLayer(img)
+var description = 'terrabio_samples'
+var folder = 'terrabio_samples'
+Export.table.toDrive({collection:ceo_samples, description:description+'-Drive', fileNamePrefix:description, folder:folder, selectors:'LON,LAT,PLOTID,SAMPLEID,landcover'});	
+// Export.table.toAsset(new_samples,description,'projects/lao-expanded/assets/samples/'+ description)
+
+
+
+function ceoClean(f){	  
+  // LON,LAT,PLOTID,SAMPLEID.
+  var fid = ee.Feature(f).id();
+  var coords = f.geometry().coordinates();
+  return f.set('LON',coords.get(0),'LAT',coords.get(1),'PLOTID',fid,'SAMPLEID',fid);	}
+
