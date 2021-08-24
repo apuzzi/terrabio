@@ -1,0 +1,24 @@
+var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
+
+var img = ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_20m_100trees_B");
+
+function ceoClean(f){	  
+  // LON,LAT,PLOTID,SAMPLEID.
+  var fid = ee.Feature(f).id();
+  var coords = f.geometry().coordinates();
+  return f.set('LON',coords.get(0),'LAT',coords.get(1),'PLOTID',fid,'SAMPLEID',fid);	}
+
+var sample = img.sample({
+  region: aoi,
+  scale: 5,
+  numPixels: 750,
+  geometries: true
+}).map(ceoClean)
+
+print(sample)
+print(sample.aggregate_histogram('classification'))
+Map.addLayer(sample)
+
+Export.table.toDrive({
+  collection:sample
+})
