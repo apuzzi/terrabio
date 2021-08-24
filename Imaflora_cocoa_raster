@@ -1,0 +1,14 @@
+var prop = ee.FeatureCollection('users/an-sig/TerraBio/Imaflora_properties');
+print(prop.aggregate_array('landuse_cl').distinct());
+var cocoa = prop.filterMetadata('landuse_cl','equals','cocoa');
+var cocoa = cocoa.map(function(ft){
+  return ft.set('cocoa',1);
+});
+print(cocoa);
+var cocoa_raster = cocoa.reduceToImage({
+  properties:[/*'shaded','number','area_ha',*/'cocoa'],
+  reducer:ee.Reducer.first()
+});
+Map.addLayer(cocoa_raster);
+
+Map.centerObject(cocoa,8);
