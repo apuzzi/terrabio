@@ -24,4 +24,4 @@ Export.image.toAsset({
 
 
 var test = ee.Image('users/an-sig/TerraBio/Imaflora_cocoa_raster');
-Map.addLayer(test);
+Map.addLayer(test,{palette:["ff0000"]});
