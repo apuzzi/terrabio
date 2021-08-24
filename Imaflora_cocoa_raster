@@ -21,3 +21,7 @@ Export.image.toAsset({
   assetId: 'users/an-sig/TerraBio/Imaflora_cocoa_raster',
   description: 'Imaflora_cocoa_raster'
 });
+
+
+var test = ee.Image('users/an-sig/TerraBio/Imaflora_cocoa_raster');
+Map.addLayer(test);
