@@ -12,3 +12,12 @@ var cocoa_raster = cocoa.reduceToImage({
 Map.addLayer(cocoa_raster);
 
 Map.centerObject(cocoa,8);
+
+Export.image.toAsset({
+  image: cocoa_raster,
+  scale:5,
+  maxPixels:1e13,
+  region: ee.FeatureCollection('users/an-sig/TerraBio/aoi'),
+  assetId: 'users/an-sig/TerraBio/Imaflora_cocoa_raster',
+  description: 'Imaflora_cocoa_raster'
+});
