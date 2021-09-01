@@ -1,0 +1,134 @@
+////////////////////////////////////// LANDTRENDR ALGORITHM /////////////////////////////////////////////
+/// Retrieves a disturbances map based on specified paramenters /////////////////////////////////////////
+/// See Kennedy et al., 2010 for algorithm details, and Kennedy et al., 2018 for GEE implementation /////
+/// This particular piece of code to obtain LandTrendr outputs was writen by Y. Reygadas and V. Galati //
+// Adapted by Andrea Nicolau for TerraBio project
+
+/////////////////////////////////// User-defined information ///////////////////////////////////////////
+// Defines the input variable (s)
+var indices = ['NDFI']; // Input variable(s) to be segmented
+
+// Defines collection parameters
+var startYear = 2010; // Start year for the annual collection
+var endYear = 2015; // End year annual collection
+var startDay = '01-01'; // The minimum date in the desired seasonal range over which to generate annual composite
+var endDay = '12-31'; // The maximum date in the desired seasonal range over which to generate annual composite
+var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi'); // The study area over which to mosaic images
+var maskThese = ['cloud', 'shadow', 'snow', 'water']; //*A list of CFMASK mask classes to include as masked pixels
+
+// Defines parameters to control segmentation
+var runParams = { 
+  maxSegments:            6,// Maximum number of segments to be fitted on the time series
+  spikeThreshold:         1,// Threshold for dampening (1 means no dampening)
+  vertexCountOvershoot:   3,// The initial regression-based detection of potential vertices can 
+                            // overshoot the maxSegments+1 vertices by this value. Angle-based culling is 
+                            // used to return to the desired number of vertices if overshoot occurs. It allows
+                            // a mix of criteria for vertex identification
+  preventOneYearRecovery: false, // Prevent segments that represent one year recoveries
+  recoveryThreshold:      1,// During fitting, if a segment has a recovery rate faster than 1/recoveryThreshold 
+                            // (in years), that segment is disallowed (1 turns off this parameter)
+  pvalThreshold:          0.05,// If the p-value of the best fitted model exceeds this threshold, the model is 
+                               // discarded and another is fitted using the Levenburg-Marquardt approach
+  bestModelProportion:    0.75,// Takes the model with most vertices that has a p-value that is at most this 
+                               // proportion away from the model with lowest p-value
+  minObservationsNeeded:  6// Minimum observations needed to perform output fitting
+};
+
+// Defines parameters to filter vegetation changes by:
+var changeParams = {
+  delta:  'loss', // loss or gain
+  sort:   'greatest', // type (greatest, least, newest, oldest, fastest, or slowest)
+  year:   {checked:true, start:startYear, end:endYear},//period of time (in years)
+  mag:    {checked:true, value:150,  operator:'>'},// magnitude (if the input is a normalized index, the magnitude must be multiplied by 1000)
+  dur:    {checked:true, value:19,    operator:'<'}, // duration (in years)
+  preval: {checked:true, value:150,  operator:'>'}, // pre-change spectral value (if the input is a normalized index, the value must be multiplied by 1000)
+  mmu:    {checked:true, value:3}, // minimum patch size (number of pixels)
+};
+
+// Defines an output name that will be added after these identifiers: LT_(input variable)_
+var outName1 = "loss_v3";
+var outName2 = "loss_v3_NF2000masked";
+var outName3 = "loss_v3_NF2000masked_dist";
+var outName4 = "loss_v3_NFML_dist";
+
+
+// Forest non forest mask
+var mapBiomasImg = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1'); // Annual Land Cover 
+var mapBiomas = ee.ImageCollection.fromImages(mapBiomasImg.bandNames().map(function(band){
+  var img = ee.Image(mapBiomasImg.select(ee.String(band))).rename('b1');
+  return img.set('year',ee.Number.parse(ee.String(band).slice(15)));
+}));
+var mapBiomas_fil = mapBiomas.filter(ee.Filter.and(//Creates an collection containing the years within the study period
+  ee.Filter.gte('year', startYear),
+  ee.Filter.lte('year', endYear)));
+// Function for detecting pixels covered by forest 
+//forest is 3 or 6
+var forest = function (image) {
+  return image.eq(3).or(image.eq(6)).rename("landcover").clip(aoi).set('year',image.get('year'))};
+var forestCol = mapBiomas.map(forest);
+var FNFstartYear = forestCol.filterMetadata('year','equals',startYear).first();
+var FNFendYear = forestCol.filterMetadata('year','equals',endYear).first();
+
+// ML forest mask (non forest during whole study period, rest is forest)
+var FNF = ee.Image('users/an-sig/TerraBio/MapBiomasFNF2010-2015');
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Require the LandTrendR Library that has NDFI added
+var ltgee = require('users/retinta/Tutorials:LT_Utilities_NDFI');
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Function for running LandTrendR per index
+var doLT = function(indices) {
+  for(var i in indices) { 
+    // Add index to changeParams object
+    changeParams.index = indices[i];
+    // Run landtrendr
+    var LTresult = ltgee.runLT(startYear, endYear, startDay, endDay, aoi, indices[i], [], runParams, maskThese);
+    // Call function for getting the disturbances map
+    combinedMap(LTresult,indices[i]);
+    }
+};
+
+// Function for getting a disturbances map per index
+var combinedMap = function(result,index) {
+  changeParams.year = {checked:true, start:startYear, end:endYear}; 
+  // Get the change map layers (yod, mag, dur, preval, rate, dsnr)
+  var changeImg = ltgee.getChangeMap(result, changeParams);
+  // Display the change attribute map (specifically year of disturbance-yor-)
+  Map.addLayer(changeImg.select(['yod']).clip(aoi), yodVizParms, String(index));
+  //Export results
+  exportResults(changeImg.clip(aoi).short(),index,outName1); // output
+  exportResults(changeImg.clip(aoi).select('yod').not().where(FNFendYear,2).remap([0,2],[3,2]).rename('dist').select('dist').unmask().where(FNF.not(),4).remap([0,2,3,4],[1,2,3,4]).addBands(changeImg).short(),index,outName4);
+  exportResults(changeImg.clip(aoi).updateMask(FNFstartYear.eq(1)).short(),index,outName2); // output with non-forested areas in 2010 masked
+  exportResults(changeImg.clip(aoi).updateMask(FNFstartYear.eq(1)).select('yod').not().where(FNFendYear,2).remap([0,2],[3,2]).rename('dist').select('dist').unmask().where(FNFstartYear.not(),4).remap([0,2,3,4],[1,2,3,4]).addBands(changeImg).short(),index,outName3); // output with non-forested areas in 2010 masked and disturbances post classified into degradation and deforestation
+};
+
+// Function for exporting data 
+var  exportResults = function (img, index, name){
+    Export.image.toAsset({
+    image: img, 
+    description: 'LT_'+String(index)+'_'+name,
+    assetId: 'users/an-sig/TerraBio/LT_'+String(index)+'_'+name, 
+    region: aoi, 
+    scale: 30, 
+    maxPixels: 10000000000000
+  });
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Visualization parameters (year of disturbance)
+var palette = ['#9400D3', '#4B0082', '#0000FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000'];
+var yodVizParms = {
+  min: startYear,
+  max: endYear,
+  palette: palette
+};
+
+// Adjusts map
+Map.centerObject(aoi,10);
+
+/// Runs everything ///
+doLT(indices);
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+print("All done");
