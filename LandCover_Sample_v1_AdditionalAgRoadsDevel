@@ -1,0 +1,41 @@
+var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
+
+var img = ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_20m_100trees_B");
+print(img)
+Map.addLayer(img);
+
+/*
+Class labels (number: class):
+0: "bushland"
+1: "pasture"
+2: "road"
+3: "cococa"
+4: "forest"
+5: "developed"
+6: "water"
+7: "agriculture"
+*/
+
+function ceoClean(f){	  
+  // LON,LAT,PLOTID,SAMPLEID.
+  var fid = ee.Feature(f).id();
+  var coords = f.geometry().coordinates();
+  return f.set('LON',coords.get(0),'LAT',coords.get(1),'PLOTID',fid,'SAMPLEID',fid);	}
+
+var sample = img.stratifiedSample({
+  numPoints: 5,
+  classBand:'classification',
+  region: aoi,
+  scale:5,
+  classValues:[2,5,7],
+  classPoints:[2,3,5],
+  geometries:true
+}).map(ceoClean).filter(ee.Filter.inList('classification',[2,5,7]));
+
+print(sample);
+print(sample.aggregate_histogram('classification'));
+Map.addLayer(sample);
+
+Export.table.toDrive({
+  collection:sample
+})
