@@ -60,7 +60,7 @@ var LTv3Masked = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v3_NF2010masked');
 Map.addLayer(LTv3Masked,{bands:['yod'],min:2010,max:2015,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082']},'LT v3 masked',false);
 
 var LTv3MaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v3_NF2010masked_dist');
-Map.addLayer(LTv3MaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v3 masked degrad&deforest',false);
+Map.addLayer(LTv3MaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v3 masked degrad&deforest');
 
 var LTv3NotMaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v3_NFML_dist');
 Map.addLayer(LTv3NotMaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v3 not-masked degrad&deforest',false);
