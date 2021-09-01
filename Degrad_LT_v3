@@ -40,15 +40,15 @@ var changeParams = {
   sort:   'greatest', // type (greatest, least, newest, oldest, fastest, or slowest)
   year:   {checked:true, start:startYear, end:endYear},//period of time (in years)
   mag:    {checked:true, value:150,  operator:'>'},// magnitude (if the input is a normalized index, the magnitude must be multiplied by 1000)
-  dur:    {checked:true, value:19,    operator:'<'}, // duration (in years)
+  dur:    {checked:true, value:5,    operator:'<'}, // duration (in years)
   preval: {checked:true, value:150,  operator:'>'}, // pre-change spectral value (if the input is a normalized index, the value must be multiplied by 1000)
   mmu:    {checked:true, value:3}, // minimum patch size (number of pixels)
 };
 
 // Defines an output name that will be added after these identifiers: LT_(input variable)_
 var outName1 = "loss_v3";
-var outName2 = "loss_v3_NF2000masked";
-var outName3 = "loss_v3_NF2000masked_dist";
+var outName2 = "loss_v3_NF2010masked";
+var outName3 = "loss_v3_NF2010masked_dist";
 var outName4 = "loss_v3_NFML_dist";
 
 
