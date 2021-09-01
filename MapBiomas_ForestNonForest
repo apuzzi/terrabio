@@ -30,8 +30,8 @@ Export.image.toAsset({
   scale:30,
   maxPixels:1e13,
   region: aoi,
-  assetId: 'users/an-sig/TerraBio/MapBiomasFNF',
-  description: 'MapBiomasFNF'
+  assetId: 'users/an-sig/TerraBio/MapBiomasFNF2010-2015',
+  description: 'MapBiomasFNF2010-2015'
 });
 
 var exported = ee.Image('users/an-sig/TerraBio/MapBiomasFNF').clip(aoi);
