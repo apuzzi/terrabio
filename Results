@@ -51,6 +51,22 @@ Map.addLayer(LTv2MaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A
 var LTv2NotMaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v2_NFML_dist');
 Map.addLayer(LTv2NotMaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v2 not-masked degrad&deforest',false);
 
+
+var LTv3 = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v3');
+var LTv3 = LTv3.updateMask(LTv3.neq(0));
+Map.addLayer(LTv3,{bands:['yod'],min:2010,max:2015,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082']},'LT v3',false);
+
+var LTv3Masked = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v3_NF2010masked');
+Map.addLayer(LTv3Masked,{bands:['yod'],min:2010,max:2015,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082']},'LT v3 masked',false);
+
+var LTv3MaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v3_NF2010masked_dist');
+Map.addLayer(LTv3MaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v3 masked degrad&deforest',false);
+
+var LTv3NotMaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v3_NFML_dist');
+Map.addLayer(LTv3NotMaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v3 not-masked degrad&deforest',false);
+
+
+
 var codedv1 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio3thou2010_postpros_v2');
 Map.addLayer(codedv1,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v1',false);
 
@@ -58,7 +74,7 @@ var codedv2 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio2000mask_
 Map.addLayer(codedv2,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v2',false);
 
 var degrad_combined = ee.Image('users/an-sig/TerraBio/Degrad_combined_v1');
-Map.addLayer(degrad_combined,{min: 1, max: 3, palette:['C71803','6A137A','4A7E11']},'Degradation Combined');
+Map.addLayer(degrad_combined,{min: 1, max: 3, palette:['C71803','6A137A','4A7E11']},'Degradation Combined',false);
 
 
 // Forest is green (1), Degradation is red (2), deforestation is purple (3), Non-forest is orange (4)
