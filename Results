@@ -17,8 +17,10 @@ var forest = function (image) {
   return image.eq(3).or(image.eq(6)).rename("landcover").clip(aoi).set('year',image.get('year'))};
 var forestCol = mapBiomas.map(forest);
 var FNF2000 = forestCol.filterMetadata('year','equals',2000).first();
+var FNF2010 = forestCol.filterMetadata('year','equals',2010).first();
 var FNF2019 = forestCol.filterMetadata('year','equals',2019).first();
 Map.addLayer(FNF2000,{min:0,max:1}, 'Forest / Non-Forest 2000',false);
+Map.addLayer(FNF2010,{min:0,max:1}, 'Forest / Non-Forest 2010',false);
 Map.addLayer(FNF2019,{min:0,max:1}, 'Forest / Non-Forest 2019',false);
 
 // ML forest mask (non forest during whole study period, rest is forest)
@@ -73,8 +75,13 @@ Map.addLayer(codedv1,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A1
 var codedv2 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio2000mask_fullparams_postpros');
 Map.addLayer(codedv2,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v2',false);
 
-var codedv3 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio2000mask_Strata_chi95_minobs4_mag4_2010_2015')
+var codedv3 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio2000mask_Strata_chi95_minobs4_mag4_2010_2015');
 Map.addLayer(codedv3,{bands: ['strata'],min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v3',false);
+
+var adjustCodedFNF = FNF2010.remap([0,1],[10,0]);
+Map.addLayer(adjustCodedFNF)
+var codedv3Adj = codedv3.add(adjustCodedFNF).remap([1,2,3,4,11,12,13,14],[1,2,3,4,2,2,2,2]);
+Map.addLayer(codedv3Adj,{bands: ['remapped'],min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v3 Adjusted',false);
 
 
 var degrad_combined = ee.Image('users/an-sig/TerraBio/Degrad_combined_v1');
