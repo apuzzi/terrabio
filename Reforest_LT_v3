@@ -40,8 +40,8 @@ var changeParams = {
   sort:   'greatest', // type (greatest, least, newest, oldest, fastest, or slowest)
   year:   {checked:true, start:startYear, end:endYear},//period of time (in years)
   mag:    {checked:true, value:300,  operator:'>'},// magnitude (if the input is a normalized index, the magnitude must be multiplied by 1000)
-  dur:    {checked:true, value:5,    operator:'<'}, // duration (in years)
-  preval: {checked:true, value:200,  operator:'>'}, // pre-change spectral value (if the input is a normalized index, the value must be multiplied by 1000)
+  dur:    {checked:true, value:1,    operator:'>'}, // duration (in years)
+  preval: {checked:false, value:200,  operator:'>'}, // pre-change spectral value (if the input is a normalized index, the value must be multiplied by 1000)
   mmu:    {checked:true, value:3}, // minimum patch size (number of pixels)
 };
 
@@ -60,7 +60,7 @@ var doLT = function(indices) {
     // Add index to changeParams object
     changeParams.index = indices[i];
     // Run landtrendr
-    var LTresult = ltgee.runLT(startYear, endYear, startDay, endDay, aoi, indices[i], [], runParams, maskThese);
+    var LTresult = ltgee.runLT(1989, 2019, startDay, endDay, aoi, indices[i], [], runParams, maskThese);
     // Call function for getting the disturbances map
     combinedMap(LTresult,indices[i]);
     }
@@ -107,4 +107,4 @@ doLT(indices);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 print("All done");
 
-//Map.addLayer(ee.Image('users/an-sig/TerraBio/CelsoEtAl_restoration_2010-2015'))
+Map.addLayer(ee.Image('users/an-sig/TerraBio/CelsoEtAl_restoration_2010-2015'),{min:0,max:1},'Restoration 2010-2015 Celso et al.', false)
