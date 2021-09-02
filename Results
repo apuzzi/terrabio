@@ -60,7 +60,7 @@ var LTv3Masked = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v3_NF2010masked');
 Map.addLayer(LTv3Masked,{bands:['yod'],min:2010,max:2015,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082']},'LT v3 masked',false);
 
 var LTv3MaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v3_NF2010masked_dist');
-Map.addLayer(LTv3MaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v3 masked degrad&deforest');
+Map.addLayer(LTv3MaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v3 masked degrad&deforest',false);
 
 var LTv3NotMaskedDegradDefor = ee.Image('users/an-sig/TerraBio/LT_NDFI_loss_v3_NFML_dist');
 Map.addLayer(LTv3NotMaskedDegradDefor,{bands:['remapped'],min:1,max:4, palette:['4A7E11', 'C71803','6A137A','E5A512']},'LT v3 not-masked degrad&deforest',false);
@@ -72,6 +72,10 @@ Map.addLayer(codedv1,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A1
 
 var codedv2 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio2000mask_fullparams_postpros');
 Map.addLayer(codedv2,{min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v2',false);
+
+var codedv3 = ee.Image('projects/sig-ee/TerraBio/CODED_Results_TerraBio2000mask_Strata_chi95_minobs4_mag4_2010_2015')
+Map.addLayer(codedv3,{bands: ['strata'],min: 1, max: 4, palette:['4A7E11', 'E5A512', 'C71803','6A137A']},'CODED v3',false);
+
 
 var degrad_combined = ee.Image('users/an-sig/TerraBio/Degrad_combined_v1');
 Map.addLayer(degrad_combined,{min: 1, max: 3, palette:['C71803','6A137A','4A7E11']},'Degradation Combined',false);
@@ -132,6 +136,32 @@ Map.addLayer(LTgain_v1,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa50
 var LTgain_v2 = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v2');
 var LTgain_v2 = LTgain_v2.updateMask(LTgain_v2.neq(0));
 Map.addLayer(LTgain_v2,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT gain v2',false);
+
+
+
+var LTgain_v3 = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v3');
+var LTgain_v3 = LTgain_v3.updateMask(LTgain_v3.neq(0));
+var palette = ['#9400D3', '#4B0082', '#0000FF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000'];
+var yodVizParms = {
+  bands: 'yod',
+  min: 2010,
+  max: 2015,
+  palette: palette
+};
+Map.addLayer(LTgain_v3,yodVizParms,'LT gain v3');
+
+var LTgain_v3b = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v3b');
+var LTgain_v3b = LTgain_v3b.updateMask(LTgain_v3b.neq(0));
+Map.addLayer(LTgain_v3b,yodVizParms,'LT gain v3b');
+
+var LTgain_v3c = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v3c');
+var LTgain_v3c = LTgain_v3c.updateMask(LTgain_v3c.neq(0));
+Map.addLayer(LTgain_v3c,yodVizParms,'LT gain v3c');
+
+
+
+Map.addLayer(ee.Image('users/an-sig/TerraBio/CelsoEtAl_restoration_2010-2015'),{min:0,max:1},'Restoration 2010-2015 Celso et al.', false)
+
 
 ///////////////////////////// Land use map //////////////////////////////////////////////////////
 // Thibaud's v1
