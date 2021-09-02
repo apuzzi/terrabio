@@ -50,11 +50,11 @@ var combineAll = combineDist.remap([1,2,3],[1,4,3]).unmask(2).add(combineRest.re
 Map.addLayer(combineAll,{min:1,max:6,palette:['C71803','E5A512','4A7E11','6A137A','62FF33','000000']},'CombineAll');
 
 
-// Export.image.toAsset({
-//   image: combine,
-//   scale: 30,
-//   region: aoi,
-//   maxPixels: 1e13,
-//   description: 'degrad_combined_v1',
-//   assetId: 'users/an-sig/TerraBio/Degrad_combined_v1'
-// });
+Export.image.toAsset({
+  image: combineAll,
+  scale: 30,
+  region: aoi,
+  maxPixels: 1e13,
+  description: 'degradDeforRegrowth_combined_v1',
+  assetId: 'users/an-sig/TerraBio/degradDeforRegrowth_combined_v1'
+});
