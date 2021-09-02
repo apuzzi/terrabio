@@ -150,14 +150,6 @@ var yodVizParms = {
 };
 Map.addLayer(LTgain_v3,yodVizParms,'LT gain v3');
 
-var LTgain_v3b = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v3b');
-var LTgain_v3b = LTgain_v3b.updateMask(LTgain_v3b.neq(0));
-Map.addLayer(LTgain_v3b,yodVizParms,'LT gain v3b');
-
-var LTgain_v3c = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v3c');
-var LTgain_v3c = LTgain_v3c.updateMask(LTgain_v3c.neq(0));
-Map.addLayer(LTgain_v3c,yodVizParms,'LT gain v3c');
-
 
 
 Map.addLayer(ee.Image('users/an-sig/TerraBio/CelsoEtAl_restoration_2010-2015'),{min:0,max:1},'Restoration 2010-2015 Celso et al.', false)
