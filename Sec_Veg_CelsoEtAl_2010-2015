@@ -1,0 +1,89 @@
+var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
+var sec = ee.Image('users/celsohlsj/public/secondary_forest_extent_collection5_v3').clip(aoi);
+
+//////////////// Adapted by Andrea Nicolau from Celso H L Silva Junior /////////////////////////
+
+// 0. MapBiomas Data (Colection 4.1)
+var brazil = ee.FeatureCollection("users/celsohlsj/brazil");
+var mapbiomas = ee.Image('projects/mapbiomas-workspace/public/collection5/mapbiomas_collection50_integration_v1').byte();
+Map.addLayer(mapbiomas,{},'mapbiomas',false);
+
+// 1. Reclassifying MapBiomas Data #Step 1
+var oldvalues = ee.List([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33]);
+var newvalues = ee.List([0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+
+//var forest2000 = mapbiomas.select('classification_2000').remap(oldvalues,newvalues).rename('forest2000');
+var forest2010 = mapbiomas.select('classification_2010').remap(oldvalues,newvalues).rename('forest2010');
+var forest2015 = mapbiomas.select('classification_2015').remap(oldvalues,newvalues).rename('forest2015');
+//var forest2019 = mapbiomas.select('classification_2019').remap(oldvalues,newvalues).rename('forest2019');
+
+//Map.addLayer(forest2000,{min:0,max:1},'forest2000',false);
+Map.addLayer(forest2010,{min:0,max:1},'forest2010',false);
+Map.addLayer(forest2015,{min:0,max:1},'forest2015',false);
+//Map.addLayer(forest2019,{min:0,max:1},'forest2019',false);
+
+// 1.1 Anthropic and Water Mask
+var oldvalues2 = ee.List([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33]);
+var newvalues2 = ee.List([0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,1,1,1,0,0,1,0,0,0,0,0,1,0,0,0]);
+
+//var anthropic2000 = mapbiomas.select('classification_2000').remap(oldvalues2,newvalues2).rename('anthropic2000');
+var anthropic2010 = mapbiomas.select('classification_2010').remap(oldvalues2,newvalues2).rename('anthropic2010');
+var anthropic2015 = mapbiomas.select('classification_2015').remap(oldvalues2,newvalues2).rename('anthropic2015');
+//var anthropic2019 = mapbiomas.select('classification_2019').remap(oldvalues2,newvalues2).rename('anthropic2019');
+
+var w_mask = ee.Image("JRC/GSW1_1/GlobalSurfaceWater").select("max_extent").clip(brazil).remap([0,1],[1,0]);
+
+//Map.addLayer(anthropic2000,{min:0,max:1},'anthropic2000',false);
+Map.addLayer(anthropic2010,{min:0,max:1},'anthropic2010',false);
+Map.addLayer(anthropic2015,{min:0,max:1},'anthropic2015',false);
+//Map.addLayer(anthropic2019,{min:0,max:1},'anthropic2019',false);
+
+// 2. Mapping the Annual Increment of Secondary Forests  #Step 2
+//var restoration2000_2010 = forest2000.remap([0,1],[0,2]).add(forest2010).remap([0,1,2,3],[0,1,0,0]).multiply(anthropic2000).multiply(w_mask).rename('restoration2000_2010').clip(aoi);
+//var restoration2010_2019 = forest2010.remap([0,1],[0,2]).add(forest2019).remap([0,1,2,3],[0,1,0,0]).multiply(anthropic2010).multiply(w_mask).rename('restoration2010_2019').clip(aoi);
+var restoration2010_2015 = forest2010.remap([0,1],[0,2]).add(forest2015).remap([0,1,2,3],[0,1,0,0]).multiply(anthropic2010).multiply(w_mask).rename('restoration2010_2015').clip(aoi);
+//var restoration2000_2019 = forest2000.remap([0,1],[0,2]).add(forest2019).remap([0,1,2,3],[0,1,0,0]).multiply(anthropic2000).multiply(w_mask).rename('restoration2000_2019').clip(aoi);
+
+
+// Map.addLayer(restoration2000_2010,{min:0,max:1},'Restoration 2000-2010',false);
+// Map.addLayer(restoration2010_2019,{min:0,max:1},'Restoration 2010-2019',false);
+// Map.addLayer(restoration2000_2019,{min:0,max:1},'Restoration 2000-2019',false);
+// var restoration2000_2019_ = restoration2000_2010.add(restoration2010_2019);
+// Map.addLayer(restoration2000_2019_,{min:0,max:1},'Restoration 2000-2019 accounting for disturbances in 2010',false);
+Map.addLayer(restoration2010_2015,{min:0,max:1},'Restoration 2010-2015',false);
+
+Export.image.toAsset({
+  image:restoration2010_2015,
+  scale:30,
+  maxPixels:1e13,
+  region: aoi,
+  description:'restoration2010_2015',
+  assetId:'users/an-sig/TerraBio/CelsoEtAl_restoration_2010-2015'
+});
+
+
+// Export.image.toAsset({
+//   image:restoration2000_2019,
+//   scale:30,
+//   maxPixels:1e13,
+//   region: aoi,
+//   description:'restoration2000_2019',
+//   assetId:'users/an-sig/TerraBio/CelsoEtAl_restoration_2000-2019'
+// });
+
+// Export.image.toAsset({
+//   image:restoration2000_2019_,
+//   scale:30,
+//   maxPixels:1e13,
+//   region: aoi,
+//   description:'restoration2000_2019_',
+//   assetId:'users/an-sig/TerraBio/CelsoEtAl_restoration_2000-2019_'
+// });
+
+// var LTgain_v1 = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v1');
+// var LTgain_v1 = LTgain_v1.updateMask(LTgain_v1.neq(0));
+// Map.addLayer(LTgain_v1,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT gain v1',false);
+
+// var LTgain_v2 = ee.Image('users/an-sig/TerraBio/LT_NDFI_gain_v2');
+// var LTgain_v2 = LTgain_v2.updateMask(LTgain_v2.neq(0));
+// Map.addLayer(LTgain_v2,{bands:['yod'],min:2000,max:2019,palette:['ff0000','ffa500','ffff00','008000','0000ff','4b0082','ee82ee']},'LT gain v2',false);
