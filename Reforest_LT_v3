@@ -39,9 +39,9 @@ var changeParams = {
   delta:  'gain', // loss or gain
   sort:   'greatest', // type (greatest, least, newest, oldest, fastest, or slowest)
   year:   {checked:true, start:startYear, end:endYear},//period of time (in years)
-  mag:    {checked:true, value:400,  operator:'>'},// magnitude (if the input is a normalized index, the magnitude must be multiplied by 1000)
+  mag:    {checked:true, value:300,  operator:'>'},// magnitude (if the input is a normalized index, the magnitude must be multiplied by 1000)
   dur:    {checked:true, value:5,    operator:'<'}, // duration (in years)
-  preval: {checked:true, value:400,  operator:'>'}, // pre-change spectral value (if the input is a normalized index, the value must be multiplied by 1000)
+  preval: {checked:true, value:200,  operator:'>'}, // pre-change spectral value (if the input is a normalized index, the value must be multiplied by 1000)
   mmu:    {checked:true, value:3}, // minimum patch size (number of pixels)
 };
 
@@ -106,3 +106,5 @@ Map.centerObject(aoi,10);
 doLT(indices);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 print("All done");
+
+//Map.addLayer(ee.Image('users/an-sig/TerraBio/CelsoEtAl_restoration_2010-2015'))
