@@ -1,0 +1,39 @@
+var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
+
+var img = ee.Image('users/an-sig/TerraBio/degradDeforRegrowth_combined_v1');
+print(img)
+Map.addLayer(img);
+
+/*
+Degradation (1)
+Stable non-forest (2)
+Stable forest (3)
+Deforestation (4)
+Regrowth (5)
+DifferentEvents (6)
+*/
+
+function ceoClean(f){	  
+  // LON,LAT,PLOTID,SAMPLEID.
+  var fid = ee.Feature(f).id();
+  var coords = f.geometry().coordinates();
+  return f.set('LON',coords.get(0),'LAT',coords.get(1),'PLOTID',fid,'SAMPLEID',fid);	}
+
+var sample = img.stratifiedSample({
+  numPoints: 100,
+  classBand:'remapped',
+  region: aoi,
+  scale:5,
+  classValues:[1,2,3,4,5,6],
+  classPoints:[1,1,1,1,1,1],
+  geometries:true
+}).map(ceoClean);
+
+print(sample);
+print(sample.aggregate_histogram('remapped'));
+Map.addLayer(sample);
+
+Export.table.toDrive({
+  collection:sample,
+  selectors:'LON,LAT,PLOTID,SAMPLEID,remapped'
+})
