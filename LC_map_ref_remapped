@@ -1,0 +1,28 @@
+var image = ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_20m_100trees_B");
+
+var newImage = image.add(ee.Image(1));
+
+Map.addLayer(newImage);
+
+var pts = ee.FeatureCollection('users/an-sig/TerraBio/LC-class-ref');
+
+var ptsNew = pts.map(function(ft){
+  return ft.set('ref',ee.Number(ft.get('ref')).add(1));
+});
+
+print(ptsNew.aggregate_histogram('ref'));
+
+Export.image.toAsset({
+  image: newImage,
+  scale: 5,
+  maxPixels:1e13,
+  region: ee.FeatureCollection('users/an-sig/TerraBio/aoi'),
+  description: 'LandCover_v1_remapped',
+  assetId: 'users/an-sig/TerraBio/LandCover_v1_remapped'
+});
+
+Export.table.toAsset({
+  collection: ptsNew,
+  description: 'LC-class-ref-remapped',
+  assetId: 'users/an-sig/TerraBio/LC-class-ref-remapped'
+});
