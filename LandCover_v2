@@ -1,0 +1,31 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var geometry = /* color: #d63000 */ee.Geometry.MultiPoint(),
+    imageVisParam = {"opacity":1,"bands":["classification"],"min":0,"max":10,"palette":["7a84ff","0bca34","eaff3d","ff83f5","ff2b16","25e1ff"]},
+    vis = {"opacity":1,"bands":["classification"],"min":0,"max":7,"palette":["ff8b39","fcff56","ff1616","08d1ff","1bff0c","ff35ef","0e58ff","a580ff"]},
+    cocoa = ee.Image("users/an-sig/TerraBio/Imaflora_cocoa_raster");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+/*
+Class labels (number: class):
+0: "bushland"
+1: "pasture"
+2: "road"
+3: "cococa"
+4: "forest"
+5: "developed"
+6: "water"
+7: "agriculture"
+*/
+var image = ee.ImageCollection([
+  ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_20m_100trees_a"),
+  ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_20m_100trees_b"),
+  ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_20m_100trees_c"),
+  ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_20m_100trees_d"),
+  ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_20m_100trees_e")
+  ]);
+
+// Load in the study area geometry
+var sig_polygons = ee.FeatureCollection("users/an-sig/TerraBio/Imaflora_properties");
+
+Map.addLayer(image, vis, "Random Forest");
+Map.addLayer(sig_polygons, {}, "Reference Data -- Test Set");
+Map.addLayer(cocoa)
