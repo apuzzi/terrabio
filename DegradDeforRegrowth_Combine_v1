@@ -108,11 +108,19 @@ var properties = ee.FeatureCollection('users/an-sig/TerraBio/Imaflora_properties
 Map.addLayer(properties,{color:'red'},'IMAFLORA properties',false);
 
 var dist_clip = combineDist.unmask(4).clip(properties)
-Map.addLayer(dist_clip,{min: 1, max: 4, palette:['C71803','6A137A','4A7E11','E5A512']},'Disturbance in properties',false)
+Map.addLayer(dist_clip,{min: 1, max: 4, palette:['eafe00','ff1115','07410a','68635b']},'Disturbance in properties',false)
 
 var regrowth_clip = RestExport.clip(properties)
 Map.addLayer(regrowth_clip,{min: 0, max: 1,palette:['#68EA06']},'Regrowth in properties',false)
 
+Export.image.toDrive({
+  image:dist_clip,
+  region:properties,
+  scale:30,
+  maxPixels:1e13,
+  description:"disturbances_properties",
+  fileNamePrefix:"disturbances_properties"
+})
 
 
 var regrowthAreaImage = regrowth_clip.multiply(ee.Image.pixelArea())
