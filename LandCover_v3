@@ -48,7 +48,13 @@ var pts2 = image.sampleRegions({
   properties:['ref'],
   scale:20,
   geometries:true
-})
+}).map(clean)
+
+function clean(f){	  
+  // LON,LAT
+  var coords = f.geometry().coordinates();
+  return f.set('LON',coords.get(0),'LAT',coords.get(1));}
+
 Map.addLayer(pts2)
 print(pts2)
 
