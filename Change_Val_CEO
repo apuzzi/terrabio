@@ -36,6 +36,10 @@ In regrowth map:
 print('CEO csv',table);
 
 //////////// filtering for disturbances map
+
+
+
+
 var ref_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Forest'),
                                             ee.Filter.eq('Change between 2010-2015?',false))).map(function(pt){
                                               return pt.set('old_ref',3,'new_ref',3);
@@ -98,29 +102,28 @@ var ref_multiEvents_deforest = ref_multiEvents.filterMetadata('Type of 2nd distu
 });
 
 
-var refTableDisturbance = ref_forest.merge(ref_non_forest).merge(ref_degrad).merge(ref_deforest).merge(ref_regrowth_forest).merge(ref_regrowth_nonforest).merge(ref_multiEvents_degrad).merge(ref_multiEvents_deforest);
+var refTableDisturbance = ref_forest.merge(ref_non_forest).merge(ref_degrad).merge(ref_deforest).merge(ref_regrowth_forest).merge(ref_regrowth_nonforest).merge(ref_multiEvents_degrad).merge(ref_multiEvents_deforest).select(['new_ref','old_ref','pl_remapped','pl_sampleid','plotid','lat','lon']);
 print('refTableDisturbance',refTableDisturbance);
 
 
 
 
-
-
 // Disturbances raster
-var disturbances = disturbances.unmask(4);
+var disturbances = disturbances.unmask(4).rename('new_class');
 Map.addLayer(disturbances,{min: 1, max: 4, palette:['eafe00','ff1115','07410a','68635b']},'Disturbance',false);
-Map.addLayer(regrowth,{min:0,max:1},'Regrowth',false);
+
 
 var dist_extract = disturbances.sampleRegions({
-  collection:table,
-  properties:['plotid','sampleid','lon','lat','pl_remapped',
-              'Land Cover in 2015?','Change between 2010-2015?',
-              'Type of change?','Type of disturbance?','Year of change?',
-              'Driver?','Is there a second change?','Type of change?',
-              'Type of disturbance?','Year of 2nd change?','2nd Driver?'],
+  collection:refTableDisturbance,
+  properties:['new_ref','old_ref','pl_remapped','pl_sampleid','plotid','lat','lon'],
   geometries:true
 });
 
 print('Disturbances table',dist_extract);
 Map.addLayer(dist_extract);
 
+
+
+
+///////////////////// filtering for regrowth map
+Map.addLayer(regrowth,{min:0,max:1},'Regrowth',false);
