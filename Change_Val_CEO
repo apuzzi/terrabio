@@ -3,6 +3,35 @@ var table = ee.FeatureCollection("users/an-sig/TerraBio/CEO_Change_Val_csv"),
     disturbances = ee.Image("users/an-sig/TerraBio/Degrad_combined_v2"),
     regrowth = ee.Image("users/an-sig/TerraBio/Regrowth_v1");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
+/*
+In CEO csv table:
+'pl_remapped' is original strata
+1- degradation
+2- stable non-forest
+3- forest
+4- deforestation
+5- regrowth
+6- different events (degradation or deforestation + regrowth in any order)
+
+combination of properties will give the reference class
+
+
+In disturbance map:
+'remapped' is map class
+1- degradation
+2- deforestation
+3- stable forest
+4- Stable non-forest
+
+
+
+In regrowth map:
+'remapped is map class'
+0- non-regrowth
+1- regrowth
+*/
+
+
 var disturbances = disturbances.unmask(4);
 Map.addLayer(disturbances,{min: 1, max: 4, palette:['C71803','6A137A','4A7E11','E5A512']},'Disturbance',false);
 Map.addLayer(regrowth,{min:0,max:1},'Regrowth',false);
