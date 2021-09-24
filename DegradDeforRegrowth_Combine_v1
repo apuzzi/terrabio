@@ -143,4 +143,17 @@ var distAreas = distAreaImage.reduceRegion({
     maxPixels: 1e13
     }); 
  
-print(distAreas)
+//print(distAreas)
+
+var distClassAreas = ee.List(distAreas.get('groups'))
+ 
+var distClassAreaLists = distClassAreas.map(function(item) {
+  var areaDict = ee.Dictionary(item)
+  var classNumber = ee.Number(areaDict.get('remapped')).format()
+  var area = ee.Number(
+    areaDict.get('sum')).divide(1e4)
+  return ee.List([classNumber, area])
+})
+ 
+var result = ee.Dictionary(distClassAreaLists.flatten())
+print(result)
