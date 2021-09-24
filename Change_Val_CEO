@@ -44,7 +44,7 @@ print('Forest ref points',ref_forest);
 
 var ref_non_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Non-forest'),
                                             ee.Filter.eq('Change between 2010-2015?',false))).map(function(pt){
-                                              return pt.set('ld_ref',2,'new_ref',2);
+                                              return pt.set('ld_ref',2,'new_ref',4);
                                             });
 print('Non-forest ref points',ref_non_forest);
 
@@ -60,7 +60,7 @@ var ref_deforest = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-
                                              ee.Filter.eq('Type of change?','Decrease in canopy'),
                                              ee.Filter.eq('Type of disturbance?','Deforestation'),
                                              ee.Filter.eq('Is there a second change?',false))).map(function(pt){
-                                              return pt.set('old_ref',4,'ref',4);
+                                              return pt.set('old_ref',4,'ref',2);
                                             });
 print('Deforestation ref points',ref_deforest);
 
@@ -78,7 +78,7 @@ var ref_regrowth_forest = ref_regrowth.filterMetadata('Land Cover in 2015?','equ
 });
 
 var ref_regrowth_nonforest = ref_regrowth.filterMetadata('Land Cover in 2015?','equals','Non-forest').map(function(pt){
-  return pt.set('ref',2);
+  return pt.set('ref',4);
 });
 
 
@@ -89,12 +89,12 @@ var ref_multiEvents = table.filter(ee.Filter.and(ee.Filter.eq('Change between 20
                                             });
 print('Multiple events ref points',ref_multiEvents);
 
-var ref_multiEvents_degrad = ref_multiEvents.filterMetadata('Type 2nd disturbance?','equals','Degradation').map(function(pt){
+var ref_multiEvents_degrad = ref_multiEvents.filterMetadata('Type of 2nd disturbance?','equals','Degradation').map(function(pt){
   return pt.set('ref',1);
 });
 
-var ref_multiEvents_deforest = ref_multiEvents.filterMetadata('Type 2nd disturbance?','equals','Deforestation').map(function(pt){
-  return pt.set('ref',4);
+var ref_multiEvents_deforest = ref_multiEvents.filterMetadata('Type of 2nd disturbance?','equals','Deforestation').map(function(pt){
+  return pt.set('ref',2);
 });
 
 
