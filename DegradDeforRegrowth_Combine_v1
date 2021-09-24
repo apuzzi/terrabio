@@ -21,6 +21,8 @@ Map.addLayer(lt,{min: 10, max: 30, palette:['4A7E11', 'C71803','6A137A']},'LT',f
 
 var combineDist = coded.add(lt).remap([12, 21, 22, 23, 32, 13, 31, 33, 11],[1,1,1,1,1,2,2,2,3]);
 Map.addLayer(combineDist,{min: 1, max: 3, palette:['C71803','6A137A','4A7E11']},'CombinedDist',false);
+Map.addLayer(combineDist.unmask(4),{min: 1, max: 4, palette:['C71803','6A137A','4A7E11','E5A512']},'CombinedDist w/non-forest',false);
+
 
 Export.image.toDrive({
   image:combineDist,
@@ -64,7 +66,7 @@ var combineRest = LTgain.add(celsoetal).remap([0,1,2],[0,1,1]);
 Map.addLayer(combineRest,{min:0,max:1},'CombineRest',false);
 
 var RestExport = combineRest.updateMask(combineRest.eq(1))
-Map.addLayer(RestExport)
+Map.addLayer(RestExport,{},'RestExport',false)
 
 Export.image.toDrive({
   image:RestExport,
@@ -86,7 +88,7 @@ Export.image.toAsset({
 
 
 var combineAll = combineDist.remap([1,2,3],[1,4,3]).unmask(2).add(combineRest.remap([0,1],[0,10])).remap([1,2,3,4,10,11,12,13,14],[1,2,3,4,5,6,6,6,5]);
-Map.addLayer(combineAll,{min:1,max:6,palette:['C71803','E5A512','4A7E11','6A137A','62FF33','000000']},'CombineAll');
+Map.addLayer(combineAll,{min:1,max:6,palette:['C71803','E5A512','4A7E11','6A137A','62FF33','000000']},'CombineAll',false);
 
 
 Export.image.toAsset({
@@ -97,3 +99,15 @@ Export.image.toAsset({
   description: 'degradDeforRegrowth_combined_v1',
   assetId: 'users/an-sig/TerraBio/degradDeforRegrowth_combined_v1'
 });
+
+// ------------------------------------------------------------------
+
+// areas imaflora properties
+
+var properties = ee.FeatureCollection('users/an-sig/TerraBio/Imaflora_properties');
+
+var dist_clip = combineDist.unmask(4).clip(properties)
+Map.addLayer(dist_clip,{min: 1, max: 4, palette:['C71803','6A137A','4A7E11','E5A512']},'Disturbance in properties',false)
+
+var regrowth_clip = RestExport.clip(properties)
+Map.addLayer(regrowth_clip,{min: 0, max: 1},'Regrowth in properties',false)
