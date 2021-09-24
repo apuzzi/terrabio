@@ -126,3 +126,21 @@ var regrowthArea = regrowthAreaImage.reduceRegion({
 var regrowthAreaHa = ee.Number(
   regrowthArea.get('remapped')).divide(1e4)
 print(regrowthAreaHa)
+
+
+
+
+var distAreaImage = ee.Image.pixelArea().addBands(
+      dist_clip)
+ 
+var distAreas = distAreaImage.reduceRegion({
+      reducer: ee.Reducer.sum().group({
+      groupField: 1,
+      groupName: 'remapped',
+    }),
+    geometry: properties.geometry(),
+    scale: 30,
+    maxPixels: 1e13
+    }); 
+ 
+print(distAreas)
