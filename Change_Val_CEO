@@ -33,7 +33,7 @@ In regrowth map:
 
 
 var disturbances = disturbances.unmask(4);
-Map.addLayer(disturbances,{min: 1, max: 4, palette:['C71803','6A137A','4A7E11','E5A512']},'Disturbance',false);
+Map.addLayer(disturbances,{min: 1, max: 4, palette:['eafe00','ff1115','07410a','68635b']},'Disturbance',false);
 Map.addLayer(regrowth,{min:0,max:1},'Regrowth',false);
 
 print('CEO csv',table);
