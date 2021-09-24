@@ -105,9 +105,24 @@ Export.image.toAsset({
 // areas imaflora properties
 
 var properties = ee.FeatureCollection('users/an-sig/TerraBio/Imaflora_properties');
+Map.addLayer(properties,{color:'red'},'IMAFLORA properties',false);
 
 var dist_clip = combineDist.unmask(4).clip(properties)
 Map.addLayer(dist_clip,{min: 1, max: 4, palette:['C71803','6A137A','4A7E11','E5A512']},'Disturbance in properties',false)
 
 var regrowth_clip = RestExport.clip(properties)
-Map.addLayer(regrowth_clip,{min: 0, max: 1},'Regrowth in properties',false)
+Map.addLayer(regrowth_clip,{min: 0, max: 1,palette:['#68EA06']},'Regrowth in properties',false)
+
+
+
+var regrowthAreaImage = regrowth_clip.multiply(ee.Image.pixelArea())
+
+var regrowthArea = regrowthAreaImage.reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: properties.geometry(),
+  scale: 30,
+  maxPixels: 1e13
+  })
+var regrowthAreaSqKm = ee.Number(
+  regrowthArea.get('remapped')).divide(1e4)
+print(regrowthAreaSqKm)
