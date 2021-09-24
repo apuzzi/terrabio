@@ -31,12 +31,47 @@ In regrowth map:
 1- regrowth
 */
 
+// Working the CEO table
 
+print('CEO csv',table);
+
+var ref_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Forest'),
+                                            ee.Filter.eq('Change between 2010-2015?',false)));
+print('Forest ref points',ref_forest);
+
+var ref_non_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Non-forest'),
+                                            ee.Filter.eq('Change between 2010-2015?',false)));
+print('Non-forest ref points',ref_non_forest);
+
+var ref_degrad = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015?',true),
+                                             ee.Filter.eq('Type of change?','Decrease in canopy'),
+                                             ee.Filter.eq('Type of disturbance?','Degradation'),
+                                             ee.Filter.eq('Is there a second change?',false)));
+print('Degradation ref points',ref_degrad);
+
+var ref_deforest = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015?',true),
+                                             ee.Filter.eq('Type of change?','Decrease in canopy'),
+                                             ee.Filter.eq('Type of disturbance?','Deforestation'),
+                                             ee.Filter.eq('Is there a second change?',false)));
+print('Deforestation ref points',ref_deforest);
+
+var ref_regrowth = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015?',true),
+                                             ee.Filter.eq('Type of change?','Increase in canopy'),
+                                             ee.Filter.eq('Is there a second change?',false)));
+print('Regrowth ref points',ref_regrowth);
+
+var multiEvents = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015?',true),
+                                             ee.Filter.eq('Is there a second change?',true)));
+
+
+
+
+
+
+// Disturbances raster
 var disturbances = disturbances.unmask(4);
 Map.addLayer(disturbances,{min: 1, max: 4, palette:['eafe00','ff1115','07410a','68635b']},'Disturbance',false);
 Map.addLayer(regrowth,{min:0,max:1},'Regrowth',false);
-
-print('CEO csv',table);
 
 var dist_extract = disturbances.sampleRegions({
   collection:table,
@@ -49,4 +84,5 @@ var dist_extract = disturbances.sampleRegions({
 });
 
 print('Disturbances table',dist_extract);
-Map.addLayer(dist_extract)
+Map.addLayer(dist_extract);
+
