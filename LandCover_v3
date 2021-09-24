@@ -57,3 +57,9 @@ Export.table.toAsset({
   description:'LC-class-ref-remapped_v3',
   assetId:'users/an-sig/TerraBio/LC-class-ref-remapped-v3'
 })
+
+Export.table.toDrive({
+  collection:pts2,
+  description:'LC-class-ref-remapped_v3',
+  fileNamePrefix:'LC-class-ref-remapped-v3'
+})
