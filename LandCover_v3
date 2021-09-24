@@ -14,7 +14,7 @@ Class labels (number: class):
 6: "water"
 7: "agriculture"
 */
-var image = ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_10m_250trees_min");
+var image = ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_20m_250trees_min");
 
 // Load in the study area geometry
 var sig_polygons = ee.FeatureCollection("users/an-sig/TerraBio/Imaflora_properties");
@@ -30,4 +30,13 @@ Export.image.toDrive({
   region: ee.FeatureCollection('users/an-sig/TerraBio/aoi'),
   description: 'LandCover_v3_20m',
   fileNamePrefix: 'LandCover_v3_20m'
+})
+
+Export.image.toAsset({
+  image: image,
+  scale: 20,
+  maxPixels: 1e13,
+  region: ee.FeatureCollection('users/an-sig/TerraBio/aoi'),
+  description: 'LandCover_v3_20m',
+  assetId: 'users/an-sig/TerraBio/LandCover_v3_20m_remapped'
 })
