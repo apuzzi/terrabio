@@ -40,3 +40,20 @@ Export.image.toAsset({
   description: 'LandCover_v3_20m',
   assetId: 'users/an-sig/TerraBio/LandCover_v3_20m_remapped'
 })
+
+var pts = ee.FeatureCollection('users/an-sig/TerraBio/LC-class-ref-remapped');
+
+var pts2 = image.sampleRegions({
+  collection:pts,
+  properties:['ref'],
+  scale:20,
+  geometries:true
+})
+Map.addLayer(pts2)
+print(pts2)
+
+Export.table.toAsset({
+  collection:pts2,
+  description:'LC-class-ref-remapped_v3',
+  assetId:'users/an-sig/TerraBio/LC-class-ref-remapped-v3'
+})
