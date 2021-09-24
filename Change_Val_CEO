@@ -99,7 +99,7 @@ var ref_multiEvents_deforest = ref_multiEvents.filterMetadata('Type 2nd disturba
 
 
 var refTableDisturbance = ref_forest.merge(ref_non_forest).merge(ref_degrad).merge(ref_deforest).merge(ref_regrowth_forest).merge(ref_regrowth_nonforest).merge(ref_multiEvents_degrad).merge(ref_multiEvents_deforest);
-print('newTable',refTableDisturbance);
+print('refTableDisturbance',refTableDisturbance);
 
 
 
