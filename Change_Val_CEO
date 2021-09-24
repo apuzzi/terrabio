@@ -36,32 +36,48 @@ In regrowth map:
 print('CEO csv',table);
 
 var ref_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Forest'),
-                                            ee.Filter.eq('Change between 2010-2015?',false)));
+                                            ee.Filter.eq('Change between 2010-2015?',false))).map(function(pt){
+                                              return pt.set('original_stratum',3);
+                                            });
 print('Forest ref points',ref_forest);
 
 var ref_non_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Non-forest'),
-                                            ee.Filter.eq('Change between 2010-2015?',false)));
+                                            ee.Filter.eq('Change between 2010-2015?',false))).map(function(pt){
+                                              return pt.set('original_stratum',2);
+                                            });
 print('Non-forest ref points',ref_non_forest);
 
 var ref_degrad = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015?',true),
                                              ee.Filter.eq('Type of change?','Decrease in canopy'),
                                              ee.Filter.eq('Type of disturbance?','Degradation'),
-                                             ee.Filter.eq('Is there a second change?',false)));
+                                             ee.Filter.eq('Is there a second change?',false))).map(function(pt){
+                                              return pt.set('original_stratum',1);
+                                            });
 print('Degradation ref points',ref_degrad);
 
 var ref_deforest = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015?',true),
                                              ee.Filter.eq('Type of change?','Decrease in canopy'),
                                              ee.Filter.eq('Type of disturbance?','Deforestation'),
-                                             ee.Filter.eq('Is there a second change?',false)));
+                                             ee.Filter.eq('Is there a second change?',false))).map(function(pt){
+                                              return pt.set('original_stratum',4);
+                                            });
 print('Deforestation ref points',ref_deforest);
 
 var ref_regrowth = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015?',true),
                                              ee.Filter.eq('Type of change?','Increase in canopy'),
-                                             ee.Filter.eq('Is there a second change?',false)));
+                                             ee.Filter.eq('Is there a second change?',false))).map(function(pt){
+                                              return pt.set('original_stratum',5);
+                                            });
 print('Regrowth ref points',ref_regrowth);
 
-var multiEvents = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015?',true),
-                                             ee.Filter.eq('Is there a second change?',true)));
+var ref_multiEvents = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015?',true),
+                                             ee.Filter.eq('Is there a second change?',true))).map(function(pt){
+                                              return pt.set('original_stratum',6);
+                                            });
+print('Multiple events ref points',ref_multiEvents);
+
+var newTable = ref_forest.merge(ref_non_forest).merge(ref_degrad).merge(ref_deforest).merge(ref_regrowth).merge(ref_multiEvents)
+print('newTable',newTable)
 
 
 
