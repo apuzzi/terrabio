@@ -1,0 +1,22 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var table = ee.FeatureCollection("users/an-sig/TerraBio/CEO_Change_Val_csv"),
+    disturbances = ee.Image("users/an-sig/TerraBio/Degrad_combined_v2"),
+    regrowth = ee.Image("users/an-sig/TerraBio/Regrowth_v1");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+Map.addLayer(disturbances,{min: 1, max: 4, palette:['C71803','6A137A','4A7E11','E5A512']},'Disturbance',false);
+Map.addLayer(regrowth,{min:0,max:1},'Regrowth',false);
+
+print('CEO csv',table);
+
+var dist_extract = disturbances.sampleRegions({
+  collection:table,
+  properties:['plotid','sampleid','lon','lat','pl_remapped',
+              'Land Cover in 2015?','Change between 2010-2015?',
+              'Type of change?','Type of disturbance?','Year of change?',
+              'Driver?','Is there a second change?','Type of change?',
+              'Type of disturbance?','Year of 2nd change?','2nd Driver?'],
+  geometries:true
+});
+
+print('Disturbances table',dist_extract);
+Map.addLayer(dist_extract)
