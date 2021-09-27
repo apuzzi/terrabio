@@ -42,13 +42,13 @@ print('CEO csv',table.sort('sampleid'));
 
 var ref_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Forest'),
                                             ee.Filter.eq('Change between 2010-2015?',false))).map(function(pt){
-                                              return pt.set('strata_ref',3,'dist_ref',3,'strata_map',pt.get('pl_remapped'));
+                                              return pt.set('strata_ref',3,'dist_ref',3,'strata_map',pt.get('pl_remapped'),'regrowth_ref',0);
                                             });
 print('Forest ref points',ref_forest);
 
 var ref_non_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Non-forest'),
                                             ee.Filter.eq('Change between 2010-2015?',false))).map(function(pt){
-                                              return pt.set('strata_ref',2,'dist_ref',4,'strata_map',pt.get('pl_remapped'));
+                                              return pt.set('strata_ref',2,'dist_ref',4,'strata_map',pt.get('pl_remapped'),'regrowth_ref',0);
                                             });
 print('Non-forest ref points',ref_non_forest);
 
@@ -62,14 +62,14 @@ var ref_degrad = ref_dist.filter(ee.Filter.or(ee.Filter.eq('Type of disturbance?
                                               ee.Filter.eq('Type of 2nd disturbance?','Degradation'))).filter(ee.Filter.and(
                                                 ee.Filter.neq('Type of disturbance?','Deforestation'),
                                                 ee.Filter.neq('Type of 2nd disturbance?','Deforestation'))).map(function(pt){
-                                              return pt.set('strata_ref',1,'dist_ref',1,'strata_map',pt.get('pl_remapped'));
+                                              return pt.set('strata_ref',1,'dist_ref',1,'strata_map',pt.get('pl_remapped'),'regrowth_ref',0);
                                             });
 print(ref_degrad.aggregate_array('Type of disturbance?'))
 print(ref_degrad.aggregate_array('Type of 2nd disturbance?'))
 
 var ref_def = ref_dist.filter(ee.Filter.or(ee.Filter.eq('Type of disturbance?','Deforestation'),
                                               ee.Filter.eq('Type of 2nd disturbance?','Deforestation'))).map(function(pt){
-                                              return pt.set('strata_ref',4,'dist_ref',2,'strata_map',pt.get('pl_remapped'));
+                                              return pt.set('strata_ref',4,'dist_ref',2,'strata_map',pt.get('pl_remapped'),'regrowth_ref',0);
                                             });
 print(ref_def.aggregate_array('Type of disturbance?'))
 print(ref_def.aggregate_array('Type of 2nd disturbance?'))
@@ -79,7 +79,7 @@ var ref_regrowth_forest = table.filter(ee.Filter.and(ee.Filter.eq('Change betwee
                                                      ee.Filter.eq('Type of change?','Increase in canopy'),
                                                      ee.Filter.neq('Type of 2nd change?','Decrease in canopy'),
                                                      ee.Filter.eq('Land Cover in 2015?','Forest'))).map(function(pt){
-                                              return pt.set('strata_ref',5,'dist_ref',3,'strata_map',pt.get('pl_remapped'));
+                                              return pt.set('strata_ref',5,'dist_ref',3,'strata_map',pt.get('pl_remapped'),'regrowth_ref',1);
                                             });
 print('Regrowth forest ref points',ref_regrowth_forest);
 print(ref_regrowth_forest.aggregate_array('Type of change?'))
@@ -91,7 +91,7 @@ var ref_regrowth_nonforest = table.filter(ee.Filter.and(ee.Filter.eq('Change bet
                                                      ee.Filter.eq('Type of change?','Increase in canopy'),
                                                      ee.Filter.neq('Type of 2nd change?','Decrease in canopy'),
                                                      ee.Filter.eq('Land Cover in 2015?','Non-forest'))).map(function(pt){
-                                              return pt.set('strata_ref',5,'dist_ref',4,'strata_map',pt.get('pl_remapped'));
+                                              return pt.set('strata_ref',5,'dist_ref',4,'strata_map',pt.get('pl_remapped'),'regrowth_ref',1);
                                             });
 print('Regrowth non-forest ref points',ref_regrowth_nonforest);
 
@@ -99,7 +99,7 @@ var ref_regrowth_degrad = table.filter(ee.Filter.or(ee.Filter.eq('Type of change
                                                     ee.Filter.eq('Type of 2nd change?','Increase in canopy'))).filter(
                                                       ee.Filter.or(ee.Filter.eq('Type of disturbance?','Degradation'),
                                                                    ee.Filter.eq('Type of 2nd disturbance?','Degradation'))).map(function(pt){
-                                              return pt.set('strata_ref',6,'dist_ref',1,'strata_map',pt.get('pl_remapped'));
+                                              return pt.set('strata_ref',6,'dist_ref',1,'strata_map',pt.get('pl_remapped'),'regrowth_ref',1);
                                             });
 print('Regrowth degrad ref points',ref_regrowth_degrad);
 
@@ -107,7 +107,7 @@ var ref_regrowth_def = table.filter(ee.Filter.or(ee.Filter.eq('Type of change?',
                                                     ee.Filter.eq('Type of 2nd change?','Increase in canopy'))).filter(
                                                       ee.Filter.or(ee.Filter.eq('Type of disturbance?','Deforestation'),
                                                                    ee.Filter.eq('Type of 2nd disturbance?','Deforestation'))).map(function(pt){
-                                              return pt.set('strata_ref',6,'dist_ref',2,'strata_map',pt.get('pl_remapped'));
+                                              return pt.set('strata_ref',6,'dist_ref',2,'strata_map',pt.get('pl_remapped'),'regrowth_ref',1);
                                             });
 print('Regrowth deforestation ref points',ref_regrowth_def);
 
@@ -122,22 +122,29 @@ print(refTableDisturbance);
 print(refTableDisturbance.aggregate_count_distinct('strata_ref'))
 
 
-// Disturbances raster
+// Exatracting from disturbance and regrowth rasters
 var disturbances = disturbances.unmask(4).rename('dist_map');
 Map.addLayer(disturbances,{min: 1, max: 4, palette:['eafe00','ff1115','07410a','68635b']},'Disturbance',false);
 
 
 var dist_extract = disturbances.sampleRegions({
   collection:refTableDisturbance,
-  properties:['dist_ref','strata_ref','strata_map','pl_sampleid','plotid','lat','lon'],
+  properties:['dist_ref','regrowth_ref','strata_ref','strata_map','pl_sampleid','plotid','lat','lon'],
   geometries:true
 });
 
 print('Disturbances table',dist_extract);
-Map.addLayer(dist_extract);
+//Map.addLayer(dist_extract);
 
 
 
-
-///////////////////// filtering for regrowth map
 Map.addLayer(regrowth,{min:0,max:1},'Regrowth',false);
+
+var all = regrowth.rename('regrowth_map').sampleRegions({
+  collection:dist_extract,
+  properties:['dist_ref','regrowth_ref','strata_ref','strata_map','pl_sampleid','plotid','lat','lon'],
+  geometries:true
+});
+
+print('All', all);
+Map.addLayer(all);
