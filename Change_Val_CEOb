@@ -140,7 +140,7 @@ print('Disturbances table',dist_extract);
 
 Map.addLayer(regrowth,{min:0,max:1},'Regrowth',false);
 
-var all = regrowth.rename('regrowth_map').sampleRegions({
+var all = regrowth.unmask().rename('regrowth_map').sampleRegions({
   collection:dist_extract,
   properties:['dist_ref','regrowth_ref','strata_ref','strata_map','pl_sampleid','plotid','lat','lon'],
   geometries:true
