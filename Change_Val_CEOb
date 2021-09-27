@@ -93,19 +93,19 @@ print(refTableDisturbance);
 
 
 
-// Disturbances raster
-var disturbances = disturbances.unmask(4).rename('new_class');
-Map.addLayer(disturbances,{min: 1, max: 4, palette:['eafe00','ff1115','07410a','68635b']},'Disturbance',false);
+// // Disturbances raster
+// var disturbances = disturbances.unmask(4).rename('new_class');
+// Map.addLayer(disturbances,{min: 1, max: 4, palette:['eafe00','ff1115','07410a','68635b']},'Disturbance',false);
 
 
-var dist_extract = disturbances.sampleRegions({
-  collection:refTableDisturbance,
-  properties:['new_ref','old_ref','pl_remapped','pl_sampleid','plotid','lat','lon'],
-  geometries:true
-});
+// var dist_extract = disturbances.sampleRegions({
+//   collection:refTableDisturbance,
+//   properties:['new_ref','old_ref','pl_remapped','pl_sampleid','plotid','lat','lon'],
+//   geometries:true
+// });
 
-print('Disturbances table',dist_extract);
-Map.addLayer(dist_extract);
+// print('Disturbances table',dist_extract);
+// Map.addLayer(dist_extract);
 
 
 
