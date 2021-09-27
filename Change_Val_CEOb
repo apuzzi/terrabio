@@ -36,6 +36,8 @@ In regrowth map:
 print('CEO Questions',table.first().propertyNames());
 print('CEO csv',table.sort('sampleid'));
 
+//degradation and deforestation together = deforestation
+
 //////////// filtering for disturbances map
 
 var ref_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Forest'),
@@ -58,13 +60,35 @@ var ref_dist = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015
 var ref_degrad = ref_dist.filter(ee.Filter.or(ee.Filter.eq('Type of disturbance?','Degradation'),
                                               ee.Filter.eq('Type of 2nd disturbance?','Degradation'))).filter(ee.Filter.and(
                                                 ee.Filter.neq('Type of disturbance?','Deforestation'),
-                                                ee.Filter.neq('Type of 2nd disturbance?','Deforestation')));
+                                                ee.Filter.neq('Type of 2nd disturbance?','Deforestation'))).map(function(pt){
+                                              return pt.set('old_ref',1,'new_ref',1);
+                                            });
 
 var ref_def = ref_dist.filter(ee.Filter.or(ee.Filter.eq('Type of disturbance?','Deforestation'),
-                                              ee.Filter.eq('Type of 2nd disturbance?','Deforestation')));
+                                              ee.Filter.eq('Type of 2nd disturbance?','Deforestation'))).map(function(pt){
+                                              return pt.set('old_ref',4,'new_ref',2);
+                                            });
 
-//degradation and deforestation together = deforestation
+var ref_regrowth_forest = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015',true),
+                                                     ee.Filter.eq('Type of change?','Increase in canopy'),
+                                                     ee.Filter.neq('Type of 2nd change?','Decrease in canopy'),
+                                                     ee.Filter.eq('Land Cover in 2015?','Forest'))).map(function(pt){
+                                              return pt.set('old_ref',3,'new_ref',3);
+                                            });
 
+var ref_regrowth_nonforest = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015',true),
+                                                     ee.Filter.eq('Type of change?','Increase in canopy'),
+                                                     ee.Filter.neq('Type of 2nd change?','Decrease in canopy'),
+                                                     ee.Filter.eq('Land Cover in 2015?','Non-forest'))).map(function(pt){
+                                              return pt.set('old_ref',2,'new_ref',4);
+                                            });
+
+
+var refTableDisturbance = ref_forest.merge(ref_non_forest)
+                                    .merge(ref_degra)
+                                    .merge(ref_def)
+                                    .merge(ref_regrowth_forest)
+                                    .merge(ref_regrowth_nonforest);
 print(refTableDisturbance);
 
 
