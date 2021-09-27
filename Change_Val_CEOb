@@ -85,7 +85,7 @@ var ref_regrowth_nonforest = table.filter(ee.Filter.and(ee.Filter.eq('Change bet
 
 
 var refTableDisturbance = ref_forest.merge(ref_non_forest)
-                                    .merge(ref_degra)
+                                    .merge(ref_degrad)
                                     .merge(ref_def)
                                     .merge(ref_regrowth_forest)
                                     .merge(ref_regrowth_nonforest);
