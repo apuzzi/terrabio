@@ -79,7 +79,7 @@ var ref_regrowth_forest = table.filter(ee.Filter.and(ee.Filter.eq('Change betwee
                                                      ee.Filter.eq('Type of change?','Increase in canopy'),
                                                      ee.Filter.neq('Type of 2nd change?','Decrease in canopy'),
                                                      ee.Filter.eq('Land Cover in 2015?','Forest'))).map(function(pt){
-                                              return pt.set('old_ref',3,'new_ref',3);
+                                              return pt.set('old_ref',5,'new_ref',3);
                                             });
 print('Regrowth forest ref points',ref_regrowth_forest);
 print(ref_regrowth_forest.aggregate_array('Type of change?'))
@@ -91,7 +91,7 @@ var ref_regrowth_nonforest = table.filter(ee.Filter.and(ee.Filter.eq('Change bet
                                                      ee.Filter.eq('Type of change?','Increase in canopy'),
                                                      ee.Filter.neq('Type of 2nd change?','Decrease in canopy'),
                                                      ee.Filter.eq('Land Cover in 2015?','Non-forest'))).map(function(pt){
-                                              return pt.set('old_ref',2,'new_ref',4);
+                                              return pt.set('old_ref',5,'new_ref',4);
                                             });
 print('Regrowth non-forest ref points',ref_regrowth_nonforest);
 
@@ -99,7 +99,7 @@ var ref_regrowth_degrad = table.filter(ee.Filter.or(ee.Filter.eq('Type of change
                                                     ee.Filter.eq('Type of 2nd change?','Increase in canopy'))).filter(
                                                       ee.Filter.or(ee.Filter.eq('Type of disturbance?','Degradation'),
                                                                    ee.Filter.eq('Type of 2nd disturbance?','Degradation'))).map(function(pt){
-                                              return pt.set('old_ref',1,'new_ref',1);
+                                              return pt.set('old_ref',6,'new_ref',1);
                                             });
 print('Regrowth degrad ref points',ref_regrowth_degrad);
 
@@ -107,7 +107,7 @@ var ref_regrowth_def = table.filter(ee.Filter.or(ee.Filter.eq('Type of change?',
                                                     ee.Filter.eq('Type of 2nd change?','Increase in canopy'))).filter(
                                                       ee.Filter.or(ee.Filter.eq('Type of disturbance?','Deforestation'),
                                                                    ee.Filter.eq('Type of 2nd disturbance?','Deforestation'))).map(function(pt){
-                                              return pt.set('old_ref',4,'new_ref',2);
+                                              return pt.set('old_ref',6,'new_ref',2);
                                             });
 print('Regrowth deforestation ref points',ref_regrowth_def);
 
@@ -119,22 +119,22 @@ var refTableDisturbance = ref_forest.merge(ref_non_forest)
                                     .merge(ref_regrowth_degrad)
                                     .merge(ref_regrowth_def);
 print(refTableDisturbance);
+print(refTableDisturbance.aggregate_count_distinct('old_ref'))
 
 
+// Disturbances raster
+var disturbances = disturbances.unmask(4).rename('new_class');
+Map.addLayer(disturbances,{min: 1, max: 4, palette:['eafe00','ff1115','07410a','68635b']},'Disturbance',false);
 
-// // Disturbances raster
-// var disturbances = disturbances.unmask(4).rename('new_class');
-// Map.addLayer(disturbances,{min: 1, max: 4, palette:['eafe00','ff1115','07410a','68635b']},'Disturbance',false);
 
+var dist_extract = disturbances.sampleRegions({
+  collection:refTableDisturbance,
+  properties:['new_ref','old_ref','pl_remapped','pl_sampleid','plotid','lat','lon'],
+  geometries:true
+});
 
-// var dist_extract = disturbances.sampleRegions({
-//   collection:refTableDisturbance,
-//   properties:['new_ref','old_ref','pl_remapped','pl_sampleid','plotid','lat','lon'],
-//   geometries:true
-// });
-
-// print('Disturbances table',dist_extract);
-// Map.addLayer(dist_extract);
+print('Disturbances table',dist_extract);
+Map.addLayer(dist_extract);
 
 
 
