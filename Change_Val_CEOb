@@ -148,3 +148,9 @@ var all = regrowth.unmask().rename('regrowth_map').sampleRegions({
 
 print('All', all);
 Map.addLayer(all);
+
+Export.table.toDrive({
+  collection:all,
+  selectors:['dist_map','dist_ref','regrowth_map','regrowth_ref','strata_ref','strata_map','pl_sampleid','plotid','lat','lon']
+  
+});
