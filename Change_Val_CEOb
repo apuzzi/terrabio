@@ -1,0 +1,90 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var table = ee.FeatureCollection("users/an-sig/TerraBio/CEO_Change_Val_csv"),
+    disturbances = ee.Image("users/an-sig/TerraBio/Degrad_combined_v2"),
+    regrowth = ee.Image("users/an-sig/TerraBio/Regrowth_v1");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+/*
+In CEO csv table:
+'pl_remapped' is original strata
+1- degradation
+2- stable non-forest
+3- forest
+4- deforestation
+5- regrowth
+6- different events (degradation or deforestation + regrowth in any order)
+
+combination of properties will give the reference class
+
+
+In disturbance map:
+'remapped' is map class
+1- degradation
+2- deforestation
+3- stable forest
+4- Stable non-forest
+
+
+
+In regrowth map:
+'remapped' is map class
+0- non-regrowth
+1- regrowth
+*/
+
+// -------------------------------- Working the CEO table
+
+print('CEO Questions',table.first().propertyNames());
+print('CEO csv',table.sort('sampleid'));
+
+//////////// filtering for disturbances map
+
+var ref_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Forest'),
+                                            ee.Filter.eq('Change between 2010-2015?',false))).map(function(pt){
+                                              return pt.set('old_ref',3,'new_ref',3);
+                                            });
+//print('Forest ref points',ref_forest);
+
+var ref_non_forest = table.filter(ee.Filter.and(ee.Filter.eq('Land Cover in 2015?','Non-forest'),
+                                            ee.Filter.eq('Change between 2010-2015?',false))).map(function(pt){
+                                              return pt.set('ld_ref',2,'new_ref',4);
+                                            });
+//print('Non-forest ref points',ref_non_forest);
+
+var ref_dist = table.filter(ee.Filter.and(ee.Filter.eq('Change between 2010-2015?',true),
+                                          ee.Filter.neq('Type of change?','Increase in canopy'),
+                                          ee.Filter.neq('Type of 2nd change?','Increase in canopy')));
+//print('Disturbances ref points',ref_dist);
+
+var ref_degrad = ref_dist.filter(ee.Filter.or(ee.Filter.eq('Type of disturbance?','Degradation'),
+                                              ee.Filter.eq('Type of 2nd disturbance?','Degradation'))).filter(ee.Filter.and(
+                                                ee.Filter.neq('Type of disturbance?','Deforestation'),
+                                                ee.Filter.neq('Type of 2nd disturbance?','Deforestation')));
+
+var ref_def = ref_dist.filter(ee.Filter.or(ee.Filter.eq('Type of disturbance?','Deforestation'),
+                                              ee.Filter.eq('Type of 2nd disturbance?','Deforestation')));
+
+//degradation and deforestation together = deforestation
+
+print(refTableDisturbance);
+
+
+
+// Disturbances raster
+var disturbances = disturbances.unmask(4).rename('new_class');
+Map.addLayer(disturbances,{min: 1, max: 4, palette:['eafe00','ff1115','07410a','68635b']},'Disturbance',false);
+
+
+var dist_extract = disturbances.sampleRegions({
+  collection:refTableDisturbance,
+  properties:['new_ref','old_ref','pl_remapped','pl_sampleid','plotid','lat','lon'],
+  geometries:true
+});
+
+print('Disturbances table',dist_extract);
+Map.addLayer(dist_extract);
+
+
+
+
+///////////////////// filtering for regrowth map
+Map.addLayer(regrowth,{min:0,max:1},'Regrowth',false);
