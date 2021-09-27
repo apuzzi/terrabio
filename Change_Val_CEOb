@@ -150,7 +150,7 @@ print('All', all);
 Map.addLayer(all);
 
 Export.table.toDrive({
-  collection:all,
-  selectors:['dist_map','dist_ref','regrowth_map','regrowth_ref','strata_ref','strata_map','pl_sampleid','plotid','lat','lon']
+  collection:all.sort('pl_sampleid'),
+  selectors:['dist_map','dist_ref','regrowth_map','regrowth_ref','strata_ref','strata_map','pl_sampleid','lat','lon']
   
 });
