@@ -162,7 +162,6 @@ print(regrowthOutside)
 
 
 
-
 var distAreaImage = ee.Image.pixelArea().addBands(
       dist_clip)
  
