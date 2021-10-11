@@ -156,6 +156,13 @@ print(regrowthAreaHa)
 
 
 
+var regrowthOutside = regrowthAreaHaSA.subtract(regrowthAreaHa)
+print(regrowthOutside)
+
+
+
+
+
 var distAreaImage = ee.Image.pixelArea().addBands(
       dist_clip)
  
