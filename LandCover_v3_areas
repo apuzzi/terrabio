@@ -1,5 +1,7 @@
 var LC = ee.Image("users/JohnBKilbride/SIG_Consulting/rf_classification_20m_250trees_min");
 
+var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
+
 var properties = ee.FeatureCollection('users/an-sig/TerraBio/Imaflora_properties');
 Map.addLayer(properties,{color:'red'},'IMAFLORA properties',false);
 
@@ -35,25 +37,35 @@ var result = ee.Dictionary(LCClassAreaLists.flatten())
 print(result)
 
 
-// ----- Study area
+/// ----------------------------------
+var pastureAreaUnbiasedSAha = ee.Number(1396415)
+var cocoaAreaUnbiasedSAha = ee.Number(54979)
 
-var LCAreaImage = ee.Image.pixelArea().addBands(
-      LC_clip)
+var pasturePercent = ee.Number(result.get('1')).divide(pastureAreaUnbiasedSAha).multiply(ee.Number(100))
+print(pasturePercent)
+
+var cocoaPercent = ee.Number(result.get('3')).divide(cocoaAreaUnbiasedSAha).multiply(ee.Number(100))
+print(cocoaPercent)
+
+/// --------------------------- total areas pixel count
+
+var LCAreaImage_ = ee.Image.pixelArea().addBands(
+      LC)
  
-var LCAreas = LCAreaImage.reduceRegion({
+var LCAreas_ = LCAreaImage_.reduceRegion({
       reducer: ee.Reducer.sum().group({
       groupField: 1,
       groupName: 'classification',
     }),
-    geometry: properties.geometry(),
+    geometry: aoi,
     scale: 20,
     maxPixels: 1e13
     }); 
  
 
-var LCClassAreas = ee.List(LCAreas.get('groups'))
+var LCClassAreas_ = ee.List(LCAreas_.get('groups'))
  
-var LCClassAreaLists = LCClassAreas.map(function(item) {
+var LCClassAreaLists_ = LCClassAreas_.map(function(item) {
   var areaDict = ee.Dictionary(item)
   var classNumber = ee.Number(areaDict.get('classification')).format()
   var area = ee.Number(
@@ -61,5 +73,11 @@ var LCClassAreaLists = LCClassAreas.map(function(item) {
   return ee.List([classNumber, area])
 })
  
-var result = ee.Dictionary(LCClassAreaLists.flatten())
-print(result)
+var result_ = ee.Dictionary(LCClassAreaLists_.flatten())
+print(result_)
+
+var pasturePercent_ = ee.Number(result.get('1')).divide(ee.Number(result_.get('1'))).multiply(ee.Number(100))
+print(pasturePercent_)
+
+var cocoaPercent_ = ee.Number(result.get('3')).divide(ee.Number(result_.get('3'))).multiply(ee.Number(100))
+print(cocoaPercent_)
