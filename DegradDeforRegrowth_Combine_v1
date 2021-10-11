@@ -100,6 +100,24 @@ Export.image.toAsset({
   assetId: 'users/an-sig/TerraBio/degradDeforRegrowth_combined_v1'
 });
 
+// -------------------------------------------------------------------
+
+// regrowth area
+
+var regrowthAreaImageSA = RestExport.multiply(ee.Image.pixelArea())
+
+var regrowthAreaSA = regrowthAreaImageSA.reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: aoi,
+  scale: 30,
+  maxPixels: 1e13
+  })
+var regrowthAreaHaSA = ee.Number(
+  regrowthAreaSA.get('remapped')).divide(1e4)
+print(regrowthAreaHaSA)
+
+
+
 // ------------------------------------------------------------------
 
 // areas imaflora properties
