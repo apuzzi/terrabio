@@ -33,3 +33,33 @@ var LCClassAreaLists = LCClassAreas.map(function(item) {
  
 var result = ee.Dictionary(LCClassAreaLists.flatten())
 print(result)
+
+
+// ----- Study area
+
+var LCAreaImage = ee.Image.pixelArea().addBands(
+      LC_clip)
+ 
+var LCAreas = LCAreaImage.reduceRegion({
+      reducer: ee.Reducer.sum().group({
+      groupField: 1,
+      groupName: 'classification',
+    }),
+    geometry: properties.geometry(),
+    scale: 20,
+    maxPixels: 1e13
+    }); 
+ 
+
+var LCClassAreas = ee.List(LCAreas.get('groups'))
+ 
+var LCClassAreaLists = LCClassAreas.map(function(item) {
+  var areaDict = ee.Dictionary(item)
+  var classNumber = ee.Number(areaDict.get('classification')).format()
+  var area = ee.Number(
+    areaDict.get('sum')).divide(1e4)
+  return ee.List([classNumber, area])
+})
+ 
+var result = ee.Dictionary(LCClassAreaLists.flatten())
+print(result)
