@@ -56,6 +56,8 @@ Export.table.toDrive({
   fileFormat: 'SHP'
 })
 
+print(imaflora.aggregate_histogram('landcover'))
+
 var para = combined.filterMetadata('group','equals','para')
 print(para)
 Export.table.toDrive({
@@ -65,3 +67,5 @@ Export.table.toDrive({
   selectors:['group','landcover','plot_id'],
   fileFormat: 'SHP'
 })
+
+print(para.aggregate_histogram('landcover'))
