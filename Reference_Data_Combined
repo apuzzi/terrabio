@@ -69,3 +69,5 @@ Export.table.toDrive({
 })
 
 print(para.aggregate_histogram('landcover'))
+
+print(points.aggregate_histogram('landcover'))
