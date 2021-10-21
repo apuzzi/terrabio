@@ -42,3 +42,26 @@ Export.table.toDrive({
   selectors:['group','landcover','plot_id'],
   fileFormat: 'SHP'
 })
+
+print(combined.aggregate_histogram('landcover'))
+
+
+var imaflora = combined.filterMetadata('group','equals','imaflora')
+print(imaflora)
+Export.table.toDrive({
+  collection: imaflora,
+  fileNamePrefix:'TerraBio_Imaflora',
+  description:'TerraBio_Imaflora',
+  selectors:['group','landcover','plot_id'],
+  fileFormat: 'SHP'
+})
+
+var para = combined.filterMetadata('group','equals','para')
+print(para)
+Export.table.toDrive({
+  collection: para,
+  fileNamePrefix:'TerraBio_Para',
+  description:'TerraBio_Para',
+  selectors:['group','landcover','plot_id'],
+  fileFormat: 'SHP'
+})
