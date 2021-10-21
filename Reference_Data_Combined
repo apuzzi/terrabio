@@ -39,5 +39,6 @@ Export.table.toDrive({
   collection: combined,
   fileNamePrefix:'TerraBio_Imaflora_Para',
   description:'TerraBio_Imaflora_Para',
-  selectors:['group','landcover','plot_id']
+  selectors:['group','landcover','plot_id'],
+  fileFormat: 'SHP'
 })
