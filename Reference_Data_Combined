@@ -1,0 +1,40 @@
+var ref = ee.FeatureCollection('users/JohnBKilbride/SIG_Consulting/terra_bio/reference_data/sig_terrabio_rf_reference_data');
+print(ref.first().propertyNames());
+print(ref);
+
+var ref = ref.map(function(f) {
+  return f.set('geo_type', f.geometry().type());
+});
+
+print(ref);
+
+var poly = ref.filter(ee.Filter.eq('geo_type', 'Polygon'));
+var geomcol = ref.filter(ee.Filter.eq('geo_type', 'GeometryCollection'));
+var points = ref.filter(ee.Filter.eq('geo_type', 'Point'));
+
+print('Polygons',poly);
+print('GeometryCollection',geomcol);
+print('points',points);
+
+Map.addLayer(ref.filterMetadata('system:index','equals','000000000000000004f8'));
+
+var withoutNonPoly = geomcol.map(function (feature) {
+  // This can't (I think) be expressed as an ee.Filter, so use map & dropNulls instead
+  var filteredGeoms = feature.geometry().geometries().map(function (geometry) {
+    geometry = ee.Geometry(geometry);
+    // Test is reversed because we don't have a simple "equals" and compareTo
+    // returns 0 for equal.
+    return ee.Algorithms.If(geometry.type().compareTo('Polygon'), null, geometry);
+  }, /* dropNulls= */ true);
+  return feature.setGeometry(ee.Geometry.MultiPolygon(filteredGeoms));
+});
+print(withoutNonPoly)
+
+var combined = poly.merge(withoutNonPoly)
+print(combined)
+Map.addLayer(combined)
+Export.table.toDrive({
+  collection: combined,
+  fileNamePrefix:'TerraBio_Imaflora_Para',
+  description:'TerraBio_Imaflora_Para'
+})
