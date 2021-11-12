@@ -1,0 +1,16 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var table = ee.FeatureCollection("users/an-sig/TerraBio/Imaflora_Para_Dissolved"),
+    image = ee.Image("users/an-sig/TerraBio/Imaflora_Para_Dissolved_Raster");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+Map.addLayer(table)
+var image = table.reduceToImage(['landcover'],ee.Reducer.first())
+Map.addLayer(image)
+Export.image.toAsset({
+  image: image,
+  scale:30,
+  description:'Imaflora_Para_Dissolved_Raster',
+  assetId: 'users/an-sig/TerraBio/Imaflora_Para_Dissolved_Raster',
+  region: ee.FeatureCollection('users/an-sig/TerraBio/aoi')
+})
+
+Map.addLayer(image)
