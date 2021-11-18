@@ -1,0 +1,19 @@
+function main () {
+  
+  // Load in the imagery
+  var planet_images = ee.ImageCollection("projects/servir-amazonia/TerraBio/ImageCollections/Planet")
+    .select(['blue', 'green', 'red', 'nir']);
+  
+  // Visualize each image
+  var num_images = planet_images.size().getInfo();
+  var image_list = planet_images.toList(1e3);
+  for (var i = 0; i < num_images; i++) {
+    var image = ee.Image(image_list.get(i));
+    var date = image.date();
+    var date_str = date.get('year').format().getInfo() + "_" + date.get('month').format().getInfo() + '_' + date.get('day').format().getInfo();
+    Map.addLayer(image, {min:0, max:[3500,800,800], bands:['nir', 'red', 'green']}, date_str);
+  } 
+  
+}
+
+main();
