@@ -1,5 +1,6 @@
 var aoi = ee.FeatureCollection('users/an-sig/TerraBio/aoi');
 
+
 var img = ee.Image('users/an-sig/TerraBio/degradDeforRegrowth_combined_v1');
 print(img)
 Map.addLayer(img);
